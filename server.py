@@ -24,8 +24,8 @@ def index():
 def resources(page,methods=['GET']):
     search = request.args.get('search',default="")
     classRDF = request.args.get('classRDF',default="")
-    print(page)
-    return render_template("resources.html",page=page,search=search,classRDF=classRDF)
+    label = request.args.get('label',default="")
+    return render_template("resources.html",page=page,search=search,classRDF=classRDF,label=label)
 
 
 @app.route("/classes")
@@ -64,6 +64,7 @@ def classes():
 
 @app.route("/list_resources/<page>")
 def list_resources(page,methods=['GET']):
+    offset = int(page) * 100
     search = request.args.get('search',default="")
     classRDF = request.args.get('classRDF',default="")
 
@@ -76,7 +77,7 @@ def list_resources(page,methods=['GET']):
             BIND(COALESCE(?l,?resource) AS ?label)
         }}
         LIMIT 100
-        OFFSET {page}
+        OFFSET {offset}
     """
     sparql_resources.setQuery(query)
     # print(query)
