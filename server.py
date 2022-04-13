@@ -24,7 +24,7 @@ def index():
 def resources(page,methods=['GET']):
     search = request.args.get('search',default="")
     classRDF = request.args.get('classRDF',default="")
-    label = request.args.get('label',default="")
+    label = request.args.get('label',default="Busca")
     return render_template("resources.html",page=page,search=search,classRDF=classRDF,label=label)
 
 
@@ -68,17 +68,35 @@ def list_resources(page,methods=['GET']):
     search = request.args.get('search',default="")
     classRDF = request.args.get('classRDF',default="")
 
-    query = f"""
-        prefix owl: <http://www.w3.org/2002/07/owl#>
-        prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-        select ?resource ?label where {{ 
-            ?resource a <{classRDF}>.
-            OPTIONAL{{?resource rdfs:label ?l}}
-            BIND(COALESCE(?l,?resource) AS ?label)
-        }}
-        LIMIT 100
-        OFFSET {offset}
-    """
+    filterSearch = ""
+    if search != None and search != '':
+        filterSearch = f"""FILTER(CONTAINS(STR(?resource),"{search}") || CONTAINS(STR(?label),"{search}"))"""
+    if classRDF != None and classRDF != '':
+        query = f"""
+            prefix owl: <http://www.w3.org/2002/07/owl#>
+            prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            select ?resource ?label where {{ 
+                ?resource a <{classRDF}>.
+                OPTIONAL{{?resource rdfs:label ?l}}
+                BIND(COALESCE(?l,?resource) AS ?label)
+                {filterSearch}
+            }}
+            LIMIT 100
+            OFFSET {offset}
+        """
+    else:
+        query = f"""
+            prefix owl: <http://www.w3.org/2002/07/owl#>
+            prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            select ?resource ?label where {{ 
+                ?resource ?p _:x2.
+                OPTIONAL{{?resource rdfs:label ?l}}
+                BIND(COALESCE(?l,?resource) AS ?label)
+                {filterSearch}
+            }}
+            LIMIT 100
+            OFFSET {offset}
+        """
     sparql_resources.setQuery(query)
     # print(query)
     sparql_resources.setReturnFormat(JSON)

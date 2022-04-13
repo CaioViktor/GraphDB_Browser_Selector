@@ -23,7 +23,10 @@
         </title>
     </head>
     <body class="is-preload">
-        <input id="search" placeholder="Buscar" name="search"/>
+        <form id="form_search" action="{{url_for('resources',page='0')}}" method="GET">
+            <input id="search" placeholder="Buscar" name="search"/>
+            <input id="bt_search" type="submit"/>
+        </form>
         <div id="header">
             <a href="{{url_for('index')}}">Classes</a>
         </div>

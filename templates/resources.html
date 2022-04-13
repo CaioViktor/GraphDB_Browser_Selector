@@ -25,13 +25,13 @@
             function last(){
                 var next_page = parseInt(page) - 1;
                 next_page = next_page.toString();
-                let new_url = "/resources/"+next_page+"?classRDF="+classRDF+"&label="+label;
+                let new_url = "/resources/"+next_page+"?classRDF="+classRDF+"&label="+label+"&search="+search;
                 window.location.href = new_url;
             }
             $(document).keyup(function(event){
                 if(event.which === 13){
                     var next_page = $("#page")[0].value;
-                let new_url = "/resources/"+next_page+"?classRDF="+classRDF+"&label="+label;
+                let new_url = "/resources/"+next_page+"?classRDF="+classRDF+"&label="+label+"&search="+search;
                 window.location.href = new_url;
                 }
             })
@@ -39,7 +39,7 @@
             function next(){
                 var next_page = parseInt(page) + 1;
                 next_page = next_page.toString();
-                let new_url = "/resources/"+next_page+"?classRDF="+classRDF+"&label="+label;
+                let new_url = "/resources/"+next_page+"?classRDF="+classRDF+"&label="+label+"&search="+search;
                 window.location.href = new_url;
             }
         </script>
@@ -49,7 +49,12 @@
         </title>
     </head>
     <body class="is-preload">
-        <input id="search" placeholder="Buscar" name="search"/>
+        <form id="form_search" action="{{url_for('resources',page='0')}}" method="GET">
+            <input id="search" placeholder="Buscar" value="{{search}}" name="search"/>
+            <input type="hidden" name="classRDF" value="{{classRDF}}">
+            <input type="hidden" name="label" value="{{label}}">
+            <input id="bt_search" type="submit"/>
+        </form>
         <div id="header">
             <a href="{{url_for('index')}}">Classes</a> > <a href="{{url_for('resources',page=0,classRDF=classRDF,label=label)}}">{{label}}</a>
         </div>
