@@ -19,7 +19,7 @@
 
 
         <title>
-            Seleção de classes
+            Consultas Salvas
         </title>
     </head>
     <body class="is-preload">
@@ -32,14 +32,15 @@
             <a href="{{url_for('index')}}">Classes</a>
         </div>
         <div id="main">
-            <table id="elements">
-                <tbody></tbody>
-            </table>
+            <ol>
+                {%for query in saved_queries%}
+                    <li><a href="{{url_for('list_itens_saved',id=(loop.index-1),page=0)}}">{{query['description']}}</a></li>
+                {%endfor%}
+            </ol>
         </div>
     </body>
     <script type="text/javascript">
         
     </script>
-    <script type="text/javascript" src="{{url_for('static',filename='js/classes.js')}}"></script>
     <script type="text/javascript" src="{{url_for('static',filename='js/bootstrap.js')}}"></script>
 </html>

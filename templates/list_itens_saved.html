@@ -18,20 +18,19 @@
         <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
         <script>
             const page= "{{page}}";
-            const search= "{{search}}";
-            const classRDF= "{{classRDF}}";
-            const label= "{{label}}";
+            const id= "{{id}}";
+        
             
             function last(){
                 var next_page = parseInt(page) - 1;
                 next_page = next_page.toString();
-                let new_url = "/resources/"+next_page+"?classRDF="+classRDF+"&label="+label+"&search="+search;
+                let new_url = "/list_itens_saved/"+id+"/"+next_page;
                 window.location.href = new_url;
             }
             $(document).keyup(function(event){
                 if(event.which === 13){
                     var next_page = $("#page")[0].value;
-                let new_url = "/resources/"+next_page+"?classRDF="+classRDF+"&label="+label+"&search="+search;
+                    let new_url = "/list_itens_saved/"+id+"/"+next_page;
                 window.location.href = new_url;
                 }
             })
@@ -39,7 +38,7 @@
             function next(){
                 var next_page = parseInt(page) + 1;
                 next_page = next_page.toString();
-                let new_url = "/resources/"+next_page+"?classRDF="+classRDF+"&label="+label+"&search="+search;
+                let new_url = "/list_itens_saved/"+id+"/"+next_page;
                 window.location.href = new_url;
             }
         </script>
@@ -58,7 +57,7 @@
             <a href="{{url_for('index')}}">Classes</a> | <a href="{{url_for('list_saved')}}">Consultas Salvas</a>
         </form>
         <div id="header">
-            <a href="{{url_for('index')}}">Classes</a> > <a href="{{url_for('resources',page=0,classRDF=classRDF,label=label)}}">{{label}}</a>
+            <a href="{{url_for('resources',page=0,id=id)}}">Questão Salva {{id}}</a>
         </div>
         <div id="main">
             <table id="elements">
@@ -72,6 +71,6 @@
         </div>
     </body>
 
-    <script type="text/javascript" src="{{url_for('static',filename='js/resources.js')}}"></script>
+    <script type="text/javascript" src="{{url_for('static',filename='js/list_itens_saved.js')}}"></script>
     <script type="text/javascript" src="{{url_for('static',filename='js/bootstrap.js')}}"></script>
 </html>
