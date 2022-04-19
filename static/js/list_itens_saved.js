@@ -8,6 +8,7 @@ const data = d3.json("/query_saved/"+id+"/"+page).then(function(dataR){
 		$('#elements > tbody:last-child').append(row);
 		data.push(d);
 	});
+	$("#loading").hide();
 	return data;
 });
 

@@ -8,5 +8,6 @@ const data = d3.json("/classes").then(function(dataR){
 		$('#elements > tbody:last-child').append(row);
 		data.push(d);
 	});
+	$("#loading").hide()
 	return data;
 });

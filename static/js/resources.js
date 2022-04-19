@@ -8,6 +8,7 @@ const data = d3.json("/list_resources/"+page+"?classRDF="+classRDF+"&search="+se
 		$('#elements > tbody:last-child').append(row);
 		data.push(d);
 	});
+	$("#loading").hide();
 	return data;
 });
 
