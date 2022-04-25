@@ -157,5 +157,5 @@ def query_saved(id,page):
     return json.dumps({'vars':results['head']['vars'],'resources':resources}, ensure_ascii=False).encode('utf8')
 
 if __name__ == "__main__":
-    # app.run(host='10.33.96.18',port=1111) #Colocar IP da máquina hospedeira (Servidor) aqui
-    app.run(host='0.0.0.0',port=1111)
+    app.run(host='10.33.96.18',port=1111) #Colocar IP da máquina hospedeira (Servidor) aqui
+    # app.run(host='0.0.0.0',port=1111)
