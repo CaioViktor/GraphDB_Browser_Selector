@@ -63,3 +63,10 @@ body{
 	margin-right: auto;
 	display: block;
 }
+
+table{
+	table-layout:fixed;
+	max-width: none;
+	table-layout: fixed;
+	word-wrap: break-word;
+  }

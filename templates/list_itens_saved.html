@@ -57,11 +57,12 @@
             <a href="{{url_for('index')}}">Classes</a> | <a href="{{url_for('list_saved')}}">Consultas Salvas</a>
         </form>
         <div id="header">
-            <a href="{{url_for('resources',page=0,id=id)}}">Questão Salva {{id}}</a>
+            <a href="{{url_for('resources',page=0,id=id)}}">Consulta Salva {{id}}</a>
         </div>
         <div id="main">
             <img src="{{url_for('static',filename='images/giphy.gif')}}" id="loading"/>
-            <table id="elements">
+            <table id="elements" class="table table-striped table-bordered">
+                <thead></thead>
                 <tbody></tbody>
             </table>
         </div>
