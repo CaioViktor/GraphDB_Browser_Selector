@@ -10,10 +10,10 @@ import urllib.parse
 # GRAPHDB_BROWSER = "http://localhost:7200/graphs-visualizations"
 # GRAPHDB_BROWSER_CONFIG = "1b4a405cc5c4431dab894b1ee3e73fb9"
 
-# ENDPOINT_ONTOLOGY = "http://10.33.96.18:7200/repositories/ONTOLOGIA_DOMINIO"
-# ENDPOINT_RESOURCES = "http://10.33.96.18:7200/repositories/GRAFO_SEFAZMA"
-# GRAPHDB_BROWSER = "http://10.33.96.18:7200/graphs-visualizations"
-# GRAPHDB_BROWSER_CONFIG = "4fc22232f35e44878c819ee03543e852"
+ENDPOINT_ONTOLOGY = "http://10.33.96.18:7200/repositories/ONTOLOGIA_DOMINIO"
+ENDPOINT_RESOURCES = "http://10.33.96.18:7200/repositories/GRAFO_SEFAZMA"
+GRAPHDB_BROWSER = "http://10.33.96.18:7200/graphs-visualizations"
+GRAPHDB_BROWSER_CONFIG = "4fc22232f35e44878c819ee03543e852"
 
 
 # ENDPOINT_ONTOLOGY = "http://10.33.96.18:7200/repositories/ONTOLOGIA_ENDERECO"
@@ -21,10 +21,10 @@ import urllib.parse
 # GRAPHDB_BROWSER = "http://10.33.96.18:7200/graphs-visualizations"
 # GRAPHDB_BROWSER_CONFIG = "4fc22232f35e44878c819ee03543e852"
 
-ENDPOINT_ONTOLOGY = "http://10.33.96.18:7200/repositories/ONTOLOGIA_DOMINIO"
-ENDPOINT_RESOURCES = "http://10.33.96.18:7200/repositories/GRAFO_SEFAZMA_TESTES"
-GRAPHDB_BROWSER = "http://10.33.96.18:7200/graphs-visualizations"
-GRAPHDB_BROWSER_CONFIG = "4fc22232f35e44878c819ee03543e852"
+# ENDPOINT_ONTOLOGY = "http://10.33.96.18:7200/repositories/ONTOLOGIA_DOMINIO"
+# ENDPOINT_RESOURCES = "http://10.33.96.18:7200/repositories/GRAFO_SEFAZMA_TESTES"
+# GRAPHDB_BROWSER = "http://10.33.96.18:7200/graphs-visualizations"
+# GRAPHDB_BROWSER_CONFIG = "4fc22232f35e44878c819ee03543e852"
 
 sparql_ontology = SPARQLWrapper(ENDPOINT_ONTOLOGY)
 sparql_resources = SPARQLWrapper(ENDPOINT_RESOURCES)
@@ -120,7 +120,7 @@ def list_resources(page,methods=['GET']):
     results = sparql_resources.query().convert()
     resources = []
     for result in results["results"]["bindings"]:
-        resource = {'uri':urllib.parse.quote(result['resource']['value']),'label':result['label']['value'],'graphdb_url':GRAPHDB_BROWSER+"?config="+GRAPHDB_BROWSER_CONFIG+"&uri="+urllib.parse.quote(result['resource']['value'])}
+        resource = {'uri':urllib.parse.quote(result['resource']['value']),'label':result['label']['value'],'graphdb_url':GRAPHDB_BROWSER+"?config="+GRAPHDB_BROWSER_CONFIG+"&uri="+urllib.parse.quote(result['resource']['value'])+"&embedded"}
         if "/" in resource['label']:
             resource['label'] = resource['label'].split("/")[-1].split("#")[-1]
         resources.append(resource)
@@ -150,12 +150,12 @@ def query_saved(id,page):
     resources = []
     for result in results["results"]["bindings"]:
         query_construct = item['construct_query'].replace("$URI",result[item['uri_var']]['value']) 
-        resource = {'graphdb_url':GRAPHDB_BROWSER+"?config="+GRAPHDB_BROWSER_CONFIG+"&query="+urllib.parse.quote(query_construct)}
+        resource = {'graphdb_url':GRAPHDB_BROWSER+"?config="+GRAPHDB_BROWSER_CONFIG+"&query="+urllib.parse.quote(query_construct)+"&embedded"}
         for var in result:
             resource[var] = result[var]['value']
         resources.append(resource)
     return json.dumps({'vars':results['head']['vars'],'resources':resources}, ensure_ascii=False).encode('utf8')
 
 if __name__ == "__main__":
-    app.run(host='10.33.96.18',port=1111) #Colocar IP da máquina hospedeira (Servidor) aqui
-    # app.run(host='0.0.0.0',port=1111)
+    # app.run(host='10.33.96.18',port=1111) #Colocar IP da máquina hospedeira (Servidor) aqui
+    app.run(host='0.0.0.0',port=1111)
