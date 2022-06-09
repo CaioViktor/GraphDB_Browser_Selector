@@ -568,4 +568,154 @@ CONSTRUCT{
     """
 }
 
-saved_queries = [q1,q2,q3,q4,q5,q6,q7,q8,q9,q10,q11]
+q12 = {
+    'description': """Quais são os órgãos públicos por esfera do poder (Executivo, Legislativo e Judiciário) e por nível (Federal, Estadual e Municipal)?""",
+    'query': """
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX sefazma: <http://www.sefaz.ma.gov.br/ontology/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT ?ente_publico ?ente ?esfera ?nivel WHERE {
+    ?ente_publico a sefazma:Ente_Publico;
+                  rdfs:label ?ente;
+    			  sefazma:esfera ?esfera;
+                  sefazma:nivel ?nivel.
+}ORDER BY ?esfera ?nivel
+LIMIT 100""",
+    'uri_var':"ente_publico",
+    'construct_query': """
+    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX sefazma: <http://www.sefaz.ma.gov.br/ontology/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+CONSTRUCT{
+    ?o1 ?p ?o
+}WHERE {
+    ?o1 ?p ?o.
+    FILTER(isUri(?o))
+    FILTER(?p != <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>)
+    FILTER(?o1 = <$URI>)
+} 
+    """
+}
+
+
+q13 = {
+    'description': """Quem Vende para os órgãos públicos?""",
+    'query': """
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX sefazma: <http://www.sefaz.ma.gov.br/ontology/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT DISTINCT ?fornecedor ?fornecedor_compra ?cnpj_cpf WHERE {
+    ?compra a sefazma:Compra_Publica;
+            sefazma:tem_fornecedor ?fornecedor.
+    ?fornecedor rdfs:label ?fornecedor_compra;
+                sefazma:cnpj_cpf ?cnpj_cpf.
+}
+LIMIT 100""",
+    'uri_var':"fornecedor",
+    'construct_query': """
+    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX sefazma: <http://www.sefaz.ma.gov.br/ontology/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+CONSTRUCT{
+    ?compra sefazma:tem_fornecedor ?fornecedor.
+}WHERE {
+    ?compra a sefazma:Compra_Publica;
+            sefazma:tem_fornecedor ?fornecedor.
+    ?fornecedor rdfs:label ?fornecedor_compra;
+                sefazma:cnpj_cpf ?cnpj_cpf.
+    FILTER(?fornecedor = <$URI>)
+}
+    """
+}
+
+
+q14 = {
+    'description': """Quais fornecedores estão com alguma restrição ou sanção nas fontes de dados integradas: (CEI, CEIS ou TCU)?""",
+    'query': """
+PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX sefazma: <http://www.sefaz.ma.gov.br/ontology/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT ?fornecedor ?fornecedor_restrito ?cnpj_cpf ?fonte WHERE {
+     ?fornecedor a sefazma:Fornecedor_Restrito;
+                 foaf:name ?fornecedor_restrito;
+                 sefazma:cnpj_cpf ?cnpj_cpf.
+ 
+    BIND(IF(CONTAINS(STR(?fornecedor),"TCU"),"TCU",IF(CONTAINS(STR(?fornecedor),"CEI"),"CEI",IF(CONTAINS(STR(?fornecedor),"CEIS"),"CEIS",""))) as ?fonte)
+}
+LIMIT 100""",
+    'uri_var':"fornecedor",
+    'construct_query': """
+    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX sefazma: <http://www.sefaz.ma.gov.br/ontology/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+CONSTRUCT{
+    ?o1 ?p ?o
+}WHERE {
+    ?o1 ?p ?o.
+    FILTER(isUri(?o))
+    FILTER(?p != <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>)
+    FILTER(?o1 = <$URI>)
+} 
+    """
+}
+
+
+q15 = {
+    'description': """Quais os Fornecedores Maranheses?""",
+    'query': """
+     PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX sefazma: <http://www.sefaz.ma.gov.br/ontology/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT ?fornecedor_restrito ?nome WHERE { 
+	?fornecedor_restrito a sefazma:Fornecedor_Restrito ;
+             	rdfs:label ?nome;
+    			sefazma:tem_unidade_federativa ?uf.
+    
+    ?uf a sefazma:Unidade_Federativa;
+        rdfs:label ?estado.
+    
+    FILTER(?estado = "MA")
+    
+}
+LIMIT 100""",
+    'uri_var':"fornecedor_restrito",
+    'construct_query': """
+    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX sefazma: <http://www.sefaz.ma.gov.br/ontology/>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+CONSTRUCT{
+    ?o1 ?p ?o
+}WHERE {
+    ?o1 ?p ?o.
+    FILTER(isUri(?o))
+    FILTER(?p != <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>)
+    FILTER(?o1 = <$URI>)
+} 
+    """
+}
+
+saved_queries = [q1,q2,q3,q4,q5,q6,q7,q8,q9,q10,q11,q12,q13,q14,q15]

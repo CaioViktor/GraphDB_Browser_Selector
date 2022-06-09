@@ -57,7 +57,7 @@
             <a href="{{url_for('index')}}">Classes</a> | <a href="{{url_for('list_saved')}}">Consultas Salvas</a>
         </form>
         <div id="header">
-            <a href="{{url_for('resources',page=0,id=id)}}">Consulta Salva {{id}}</a>
+            <a href="{{url_for('resources',page=0,id=id)}}">Consulta Salva {{(id|int)+1}}</a>
         </div>
         <div id="main">
             <img src="{{url_for('static',filename='images/giphy.gif')}}" id="loading"/>
