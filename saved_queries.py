@@ -258,7 +258,7 @@ SELECT ?estabelecimento_rfb ?cnpj_estabelecimento_rfb ?nome_fantasia_rfb ?cnpj_e
   
   ?situacao_cadastral_rfb rdfs:label ?tipo_situacao.
     FILTER(!CONTAINS(?tipo_situacao, 'ATIVA'))
-    BIND(REPLACE(STR(?tipo_situacao),"(\\d|\\-|\\_)","") as ?tipo_situacao_rfb) 
+    BIND(REPLACE(STR(?tipo_situacao),"-.*","") as ?tipo_situacao_rfb) 
     
  ?estabelecimento_cadastro a sefazma:Estabelecimento_Cadastro;
         sefazma:cnpj ?cnpj_estabelecimento_cadastro;
@@ -367,7 +367,7 @@ SELECT ?estabelecimento_rfb ?estabelecimento_cadastro ?cnpj_rfb ?cnpj_cadastro ?
      sefazma:tem_situacao_cadastral ?situacao_rfb.
     
      ?situacao_rfb rdfs:label ?tipo_situacao.
-    BIND(REPLACE(STR(?tipo_situacao),"(\\d|\\-|\\_)","") as ?tipo_situacao_rfb) 
+    BIND(REPLACE(STR(?tipo_situacao),"-.*","") as ?tipo_situacao_rfb) 
     
     ?estabelecimento_cadastro owl:sameAs ?estabelecimento_rfb.
     ?estabelecimento_cadastro a sefazma:Estabelecimento_Cadastro;
@@ -376,7 +376,7 @@ SELECT ?estabelecimento_rfb ?estabelecimento_cadastro ?cnpj_rfb ?cnpj_cadastro ?
             sefazma:tem_situacao_cadastral ?situacao_cadastro.
     
     ?situacao_cadastro rdfs:label ?tipo_situacao2.
-    BIND(REPLACE(STR(?tipo_situacao2),"(\\d|\\-|\\_)","") as ?tipo_situacao_cadastro) 
+    BIND(REPLACE(STR(?tipo_situacao2),"-.*","") as ?tipo_situacao_cadastro) 
    
     FILTER(?tipo_situacao_rfb != ?tipo_situacao_cadastro)
 }
