@@ -288,17 +288,20 @@ CONSTRUCT{
     
 } WHERE {
 
-  ?estabelecimento_rfb   sefazma:tem_situacao_cadastral ?situacao_cadastral_rfb.
+  ?estabelecimento_rfb a sefazma:Estabelecimento_RFB;
+     sefazma:tem_situacao_cadastral ?situacao_cadastral_rfb.
   
   ?situacao_cadastral_rfb rdfs:label ?tipo_situacao.
     FILTER(!CONTAINS(?tipo_situacao, 'ATIVA'))
-   
+    BIND(REPLACE(STR(?tipo_situacao),"-.*","") as ?tipo_situacao_rfb) 
     
- ?estabelecimento_cadastro      sefazma:tem_situacao_cadastral ?situacao_cadastral_cadastro.
- ?situacao_cadastral_cadastro sefazma:tipo_situacao ?tipo_situacao_cadastro.
+ ?estabelecimento_cadastro a sefazma:Estabelecimento_Cadastro;
+        sefazma:tem_situacao_cadastral ?situacao_cadastral_cadastro.
+  
+  ?situacao_cadastral_cadastro sefazma:tipo_situacao ?tipo_situacao_cadastro.
     
   ?estabelecimento_rfb owl:sameAs  ?estabelecimento_cadastro.
-  FILTER((?tipo_situacao_rfb != ?tipo_situacao_cadastro) && ?tipo_situacao_cadastro = 'ATIVA')
+    FILTER((?tipo_situacao_rfb != ?tipo_situacao_cadastro) && ?tipo_situacao_cadastro = 'ATIVA')
     FILTER(?estabelecimento_rfb = <$URI>)
 
 }
