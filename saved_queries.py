@@ -229,9 +229,9 @@ PREFIX sefazma: <http://www.sefaz.ma.gov.br/ontology/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 
 CONSTRUCT{
-    ?o1 ?p ?o
+    ?empresa ?p ?o
 }WHERE {
-    ?o1 ?p ?o.
+    ?empresa ?p ?o.
     FILTER(isUri(?o))
     FILTER(?p != <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>)
     FILTER(?o1 = <$URI>)
