@@ -39,7 +39,7 @@
 
 
 
-{% macro search() %}
+{% macro search_bar() %}
 <!-- Search Box -->
 <div id="search" class="alt">
     <h3><i class="fa-regular fa-rectangle-list"></i> Filtro de Recurso</h3>
@@ -47,9 +47,9 @@
         <div id="search_bar">
             <div class="row">
                 <div class="collumn">
-                    <input id="search" placeholder="Buscar" name="search"/>
-                    <input type="hidden" name="classRDF" value="{{classRDF}}">
-                    <input type="hidden" name="label" value="{{label}}">
+                    <input id="search_i" placeholder="Buscar" name="search"/>
+                    <input type="hidden" name="classRDF" id="classRDF" value="{{classRDF}}">
+                    <input type="hidden" name="label" id="label" value="{{label}}">
                     <input id="bt_search" type="submit" value="Buscar"/><br/>
                 </div>
             </div>

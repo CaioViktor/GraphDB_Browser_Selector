@@ -148,7 +148,7 @@ details table,details tr,details td,details th{
 #search_bar > .row > .collumn > label{
 	margin: 0px 5px 0px 20px;
 }
-#search_bar > .row > .collumn > #search{
+#search_bar > .row > .collumn > #search_i{
 	width: 90%;
 	margin: 15px 0px 0px 20px;
 }

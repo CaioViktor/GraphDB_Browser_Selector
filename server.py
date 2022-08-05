@@ -95,7 +95,7 @@ def list_resources(page,methods=['GET']):
 
     filterSearch = ""
     if search != None and search != '':
-        filterSearch = f"""FILTER(CONTAINS(STR(?resource),"{search}") || CONTAINS(STR(?label),"{search}"))"""
+        filterSearch = f"""FILTER(REGEX(STR(?resource),"{search}","i") || REGEX(STR(?label),"{search}","i"))"""
     if classRDF != None and classRDF != '':
         query = f"""
             prefix owl: <http://www.w3.org/2002/07/owl#>

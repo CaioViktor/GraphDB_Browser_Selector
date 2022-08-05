@@ -1,6 +1,6 @@
 {% from 'macros.html' import menu %}
 {% from 'macros.html' import footer %}
-{% from 'macros.html' import search %}
+{% from 'macros.html' import search_bar %}
 <!DOCTYPE html>
 <html>
     <head>
@@ -55,7 +55,6 @@
         </title>
     </head>
     <body class="is-preload">
-
         <!-- Wrapper -->
         <div id="wrapper">
             <!-- Main -->
@@ -70,7 +69,7 @@
                         <a href="{{url_for('index')}}"><i class="fa-solid fa-circle-nodes"></i> Classes</a> > <a href="{{url_for('resources',page=0,classRDF=classRDF,label=label)}}"><i class="fa-solid fa-diagram-project"></i> {{label}}</a>
                     </div>
                     <div id="conteudo">
-                        {{search()}}
+                        {{search_bar()}}
                     
                         <section class="tables" id="tabela_consistencia">
                             <div class="container-fluid">
@@ -105,7 +104,11 @@
         {{menu()}}
             
     </body>
-    
+    <script type="text/javascript">
+        $("#classRDF")[0].value = "{{classRDF}}";
+        $("#label")[0].value = "{{label}}";
+        $("#search_i")[0].value = "{{search}}";
+    </script>
     <script type="text/javascript" src="{{url_for('static',filename='js/resources.js')}}"></script>
     <script type="text/javascript" src="{{url_for('static',filename='js/bootstrap.js')}}"></script>
     <script type="text/javascript" src="{{url_for('static',filename='js/browser.min.js')}}"></script>

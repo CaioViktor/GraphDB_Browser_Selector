@@ -1,6 +1,6 @@
 {% from 'macros.html' import menu %}
 {% from 'macros.html' import footer %}
-{% from 'macros.html' import search %}
+{% from 'macros.html' import search_bar %}
 <!DOCTYPE html>
 <html>
     <head>
@@ -70,7 +70,7 @@
                         <a href="{{url_for('list_saved')}}"><i class="fa-solid fa-heart-circle-check"></i> Consultas Salvas</a>
                     </div>
                     <div id="conteudo">
-                        {{search()}}
+                        {{search_bar()}}
                     
                         <section class="tables" id="tabela_consistencia">
                             <div class="container-fluid">
