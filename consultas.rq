@@ -1,0 +1,79 @@
+#Listar atualizações ordenadas por ordem de acontecimento
+
+prefix owl: <http://www.w3.org/2002/07/owl#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix tl: <http://purl.org/NET/c4dm/timeline.owl#>
+prefix sfz: <http://www.sefaz.ma.gov.br/ontology/>
+SELECT ?estabelecimento ?data ?n_serie ?campo ?campo_r  ?va ?vn WHERE{
+	?estabelecimento sfz:tem_timeLine ?tl.
+    ?inst tl:timeLine ?tl;
+          sfz:tem_atualizacao ?att;
+          tl:atDate ?data.
+    ?att sfz:valor_antigo ?va;
+         sfz:valor_novo ?vn;
+         sfz:atributo ?campo;
+         sfz:atributo_relacional ?campo_r;
+         sfz:numero_serie ?n_serie
+}
+ORDER BY ?estabelecimento ?data  ?campo ?n_serie 
+
+
+#Qual o valor para uma propriedade na data 
+prefix owl: <http://www.w3.org/2002/07/owl#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix tl: <http://purl.org/NET/c4dm/timeline.owl#>
+prefix sfz: <http://www.sefaz.ma.gov.br/ontology/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+SELECT ?estabelecimento ?data ?n_serie ?campo ?campo_r  ?va ?vn WHERE{
+	?estabelecimento sfz:tem_timeLine ?tl.
+    ?inst tl:timeLine ?tl;
+          sfz:tem_atualizacao ?att;
+          tl:atDate ?data.
+    ?att sfz:valor_antigo ?va;
+         sfz:valor_novo ?vn;
+         sfz:atributo ?campo;
+         sfz:atributo_relacional ?campo_r;
+         sfz:numero_serie ?n_serie.
+    FILTER(CONTAINS(?campo,"vcard:email"))
+    FILTER(?data <= "2007-11-09T17:24:26"^^xsd:dateTime) 
+}
+ORDER BY DESC(?n_serie) DESC(?data) 
+LIMIT 1
+
+#Parametrizada
+prefix owl: <http://www.w3.org/2002/07/owl#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix tl: <http://purl.org/NET/c4dm/timeline.owl#>
+prefix sfz: <http://www.sefaz.ma.gov.br/ontology/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+SELECT ?estabelecimento ?data ?n_serie ?campo ?campo_r  ?va ?vn WHERE{
+	?estabelecimento sfz:tem_timeLine ?tl.
+    ?inst tl:timeLine ?tl;
+          sfz:tem_atualizacao ?att;
+          tl:atDate ?data.
+    ?att sfz:valor_antigo ?va;
+         sfz:valor_novo ?vn;
+         sfz:atributo ?campo;
+         sfz:atributo_relacional ?campo_r;
+         sfz:numero_serie ?n_serie.
+    FILTER(CONTAINS("$CAMPO",?campo))
+    FILTER(?data <= "$DATA_INTERESSE"^^xsd:dateTime) 
+}
+ORDER BY DESC(?n_serie) DESC(?data) 
+LIMIT 1
+
+
+#Listar atributos
+prefix owl: <http://www.w3.org/2002/07/owl#>
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix tl: <http://purl.org/NET/c4dm/timeline.owl#>
+prefix sfz: <http://www.sefaz.ma.gov.br/ontology/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+SELECT DISTINCT ?campo WHERE{
+	?estabelecimento a sfz:Estabelecimento;
+        sfz:tem_timeLine ?tl.
+    ?inst tl:timeLine ?tl;
+          sfz:tem_atualizacao ?att.
+    ?att sfz:atributo ?campo.       
+}
+ORDER BY ?campo
