@@ -69,71 +69,71 @@
 # }
 
 
-q1 = {
-    'description': """Quais Empresas Não Ativas na RFB mas Ativas na SEFAZ?""",
-    'query': """
-PREFIX sefazma: <http://www.sefaz.ma.gov.br/ontology/>
-PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-PREFIX owl: <http://www.w3.org/2002/07/owl#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX vcard: <http://www.w3.org/2006/vcard/ns#>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-
-SELECT ?estabelecimento_rfb ?nome_fantasia_rfb ?tipo_situacao_rfb ?tipo_situacao_cadastro WHERE {
-    
-  ?estabelecimento_rfb a sefazma:Estabelecimento_QC1_RFB;
-              sefazma:nome_fantasia_rfb ?nome_fantasia_rfb;
-     sefazma:tem_situacao_cadastral ?situacao_cadastral_rfb.
-
-  ?situacao_cadastral_rfb 
-        sefazma:tipo_situacao ?tipo_situacao_rfb.
-    
-  ?estabelecimento_cadastro a sefazma:Estabelecimento_QC1_Cadastro;
-      sefazma:nome_fantasia_cadastro ?nome_fantasia_cadastro;
-      sefazma:tem_situacao_cadastral_cadastro ?situacao_cadastral_cadastro.
-    
-  ?estabelecimento_rfb owl:sameAs ?estabelecimento_cadastro.
-    
-  ?situacao_cadastral_cadastro 
-      sefazma:tipo_situacao ?tipo_situacao_cadastro.
- 
-}
-LIMIT 100""",
-    'uri_var':"estabelecimento_rfb",
-    'construct_query': """
-    PREFIX sefazma: <http://www.sefaz.ma.gov.br/ontology/>
-PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-PREFIX owl: <http://www.w3.org/2002/07/owl#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-PREFIX vcard: <http://www.w3.org/2006/vcard/ns#>
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-
-CONSTRUCT{
-    ?estabelecimento_rfb sefazma:tem_situacao_cadastral ?situacao_cadastral_rfb.
-    ?situacao_cadastral_rfb sefazma:tipo_situacao ?tipo_situacao_rfb.
-    ?estabelecimento_cadastro sefazma:tem_situacao_cadastral ?situacao_cadastral_cadastro.
-    ?situacao_cadastral_cadastro sefazma:tipo_situacao ?tipo_situacao_cadastro.
-    ?estabelecimento_rfb owl:sameAs  ?estabelecimento_cadastro.
-    ?estabelecimento_cadastro owl:sameAs ?estabelecimento_rfb.
-    
-}WHERE {
-  
-  ?estabelecimento_rfb a sefazma:Estabelecimento_RFB;
-     sefazma:tem_situacao_cadastral ?situacao_cadastral_rfb.
-  
-  ?situacao_cadastral_rfb sefazma:tipo_situacao ?tipo_situacao_rfb.
-  
-  ?estabelecimento_cadastro a sefazma:Estabelecimento_Cadastro;
-        sefazma:tem_situacao_cadastral ?situacao_cadastral_cadastro.
-    
-  ?situacao_cadastral_cadastro sefazma:tipo_situacao ?tipo_situacao_cadastro.
-    
-  ?estabelecimento_rfb owl:sameAs  ?estabelecimento_cadastro.
- 
-    FILTER(?estabelecimento_rfb = <$URI>)
-}
-    """
-}
+#q1 = {
+#    'description': """Quais Empresas Não Ativas na RFB mas Ativas na SEFAZ?""",
+#    'query': """
+#PREFIX sefazma: <http://www.sefaz.ma.gov.br/ontology/>
+#PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+#PREFIX owl: <http://www.w3.org/2002/07/owl#>
+#PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+#PREFIX vcard: <http://www.w3.org/2006/vcard/ns#>
+#PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+#
+#SELECT ?estabelecimento_rfb ?nome_fantasia_rfb ?tipo_situacao_rfb ?tipo_situacao_cadastro WHERE {
+#    
+#  ?estabelecimento_rfb a sefazma:Estabelecimento_QC1_RFB;
+#              sefazma:nome_fantasia_rfb ?nome_fantasia_rfb;
+#     sefazma:tem_situacao_cadastral ?situacao_cadastral_rfb.
+#
+#  ?situacao_cadastral_rfb 
+#        sefazma:tipo_situacao ?tipo_situacao_rfb.
+#    
+#  ?estabelecimento_cadastro a sefazma:Estabelecimento_QC1_Cadastro;
+#      sefazma:nome_fantasia_cadastro ?nome_fantasia_cadastro;
+#      sefazma:tem_situacao_cadastral_cadastro ?situacao_cadastral_cadastro.
+#    
+#  ?estabelecimento_rfb owl:sameAs ?estabelecimento_cadastro.
+#    
+#  ?situacao_cadastral_cadastro 
+#      sefazma:tipo_situacao ?tipo_situacao_cadastro.
+# 
+#}
+#LIMIT 100""",
+#    'uri_var':"estabelecimento_rfb",
+#    'construct_query': """
+#    PREFIX sefazma: <http://www.sefaz.ma.gov.br/ontology/>
+#PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+#PREFIX owl: <http://www.w3.org/2002/07/owl#>
+#PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+#PREFIX vcard: <http://www.w3.org/2006/vcard/ns#>
+#PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+#
+#CONSTRUCT{
+#    ?estabelecimento_rfb sefazma:tem_situacao_cadastral ?situacao_cadastral_rfb.
+#    ?situacao_cadastral_rfb sefazma:tipo_situacao ?tipo_situacao_rfb.
+#    ?estabelecimento_cadastro sefazma:tem_situacao_cadastral ?situacao_cadastral_cadastro.
+#    ?situacao_cadastral_cadastro sefazma:tipo_situacao ?tipo_situacao_cadastro.
+#    ?estabelecimento_rfb owl:sameAs  ?estabelecimento_cadastro.
+#    ?estabelecimento_cadastro owl:sameAs ?estabelecimento_rfb.
+#    
+#}WHERE {
+#  
+#  ?estabelecimento_rfb a sefazma:Estabelecimento_RFB;
+#     sefazma:tem_situacao_cadastral ?situacao_cadastral_rfb.
+#  
+#  ?situacao_cadastral_rfb sefazma:tipo_situacao ?tipo_situacao_rfb.
+#  
+#  ?estabelecimento_cadastro a sefazma:Estabelecimento_Cadastro;
+#        sefazma:tem_situacao_cadastral ?situacao_cadastral_cadastro.
+#    
+#  ?situacao_cadastral_cadastro sefazma:tipo_situacao ?tipo_situacao_cadastro.
+#    
+#  ?estabelecimento_rfb owl:sameAs  ?estabelecimento_cadastro.
+# 
+#    FILTER(?estabelecimento_rfb = <$URI>)
+#}
+#    """
+#}#
 
 
 q2 = {
@@ -187,35 +187,40 @@ q3 = {
     'description': """Quais empresas na RFB ou SEFAZ não tem mais sócio pessoa física?""",
     'query': """
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
 PREFIX owl: <http://www.w3.org/2002/07/owl#>
+
 PREFIX sefazma: <http://www.sefaz.ma.gov.br/ontology/>
+
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 
-SELECT ?o1 ?cnpj ?empresa WHERE {
+SELECT DISTINCT ?empresa ?cnpj_empresa WHERE {
 {
-    ?o1 a sefazma:Empresa_RFB;
-        rdfs:label ?empresa;
-        sefazma:cnpj ?cnpj.
-    
+    ?empresa a sefazma:Empresa_RFB;
+        sefazma:cnpj ?cnpj_empresa;
+        sefazma:tem_sociedade_juridica ?x.
+        
     MINUS {
-    	?o1 sefazma:tem_sociedade_fisica ?x.
+        ?empresa sefazma:tem_sociedade_fisica ?x2.
     }
- }
- UNION
- {
-     ?o1 a sefazma:Empresa_Cadastro;
-        rdfs:label ?empresa;
-        sefazma:cnpj ?cnpj.
-	
-	 MINUS {
-	 	?o1 sefazma:tem_sociedade ?x.
-		?x a sefazma:Sociedade_PF.
-     }   
- }
+ 
+}
+UNION
+{
+    ?empresa a sefazma:Empresa_Cadastro;
+        sefazma:cnpj ?cnpj_empresa.
+        
+    MINUS {
+        ?empresa sefazma:tem_sociedade ?x.
+        ?x a sefazma:Sociedade_PF.
+ } 
+}
+
 }
 LIMIT 100""",
-    'uri_var':"o1",
+    'uri_var':"empresa",
     'construct_query': """
     PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -224,9 +229,9 @@ PREFIX sefazma: <http://www.sefaz.ma.gov.br/ontology/>
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
 
 CONSTRUCT{
-    ?o1 ?p ?o
+    ?empresa ?p ?o
 }WHERE {
-    ?o1 ?p ?o.
+    ?empresa ?p ?o.
     FILTER(isUri(?o))
     FILTER(?p != <http://www.w3.org/1999/02/22-rdf-syntax-ns#type>)
     FILTER(?o1 = <$URI>)
@@ -253,7 +258,7 @@ SELECT ?estabelecimento_rfb ?cnpj_estabelecimento_rfb ?nome_fantasia_rfb ?cnpj_e
   
   ?situacao_cadastral_rfb rdfs:label ?tipo_situacao.
     FILTER(!CONTAINS(?tipo_situacao, 'ATIVA'))
-    BIND(REPLACE(STR(?tipo_situacao),"(\\d|\\-|\\_)","") as ?tipo_situacao_rfb) 
+    BIND(REPLACE(STR(?tipo_situacao),"-.*","") as ?tipo_situacao_rfb) 
     
  ?estabelecimento_cadastro a sefazma:Estabelecimento_Cadastro;
         sefazma:cnpj ?cnpj_estabelecimento_cadastro;
@@ -283,17 +288,20 @@ CONSTRUCT{
     
 } WHERE {
 
-  ?estabelecimento_rfb   sefazma:tem_situacao_cadastral ?situacao_cadastral_rfb.
+  ?estabelecimento_rfb a sefazma:Estabelecimento_RFB;
+     sefazma:tem_situacao_cadastral ?situacao_cadastral_rfb.
   
   ?situacao_cadastral_rfb rdfs:label ?tipo_situacao.
     FILTER(!CONTAINS(?tipo_situacao, 'ATIVA'))
-   
+    BIND(REPLACE(STR(?tipo_situacao),"-.*","") as ?tipo_situacao_rfb) 
     
- ?estabelecimento_cadastro      sefazma:tem_situacao_cadastral ?situacao_cadastral_cadastro.
- ?situacao_cadastral_cadastro sefazma:tipo_situacao ?tipo_situacao_cadastro.
+ ?estabelecimento_cadastro a sefazma:Estabelecimento_Cadastro;
+        sefazma:tem_situacao_cadastral ?situacao_cadastral_cadastro.
+  
+  ?situacao_cadastral_cadastro sefazma:tipo_situacao ?tipo_situacao_cadastro.
     
   ?estabelecimento_rfb owl:sameAs  ?estabelecimento_cadastro.
-  FILTER((?tipo_situacao_rfb != ?tipo_situacao_cadastro) && ?tipo_situacao_cadastro = 'ATIVA')
+    FILTER((?tipo_situacao_rfb != ?tipo_situacao_cadastro) && ?tipo_situacao_cadastro = 'ATIVA')
     FILTER(?estabelecimento_rfb = <$URI>)
 
 }
@@ -360,17 +368,20 @@ SELECT ?estabelecimento_rfb ?estabelecimento_cadastro ?cnpj_rfb ?cnpj_cadastro ?
      sefazma:cnpj ?cnpj_rfb;
      sefazma:nome_fantasia ?nome_fantasia_rfb;
      sefazma:tem_situacao_cadastral ?situacao_rfb.
-	
-   ?estabelecimento_rfb owl:sameAs ?estabelecimento_cadastro.
+    
+     ?situacao_rfb rdfs:label ?tipo_situacao.
+    BIND(REPLACE(STR(?tipo_situacao),"-.*","") as ?tipo_situacao_rfb) 
+    
+    ?estabelecimento_cadastro owl:sameAs ?estabelecimento_rfb.
     ?estabelecimento_cadastro a sefazma:Estabelecimento_Cadastro;
             sefazma:cnpj ?cnpj_cadastro;
             sefazma:nome_fantasia ?nome_fantasia_cadastro;
             sefazma:tem_situacao_cadastral ?situacao_cadastro.
-    OPTIONAL{
-    	?situacao_rfb sefazma:tipo_situacao ?t1.
-    	?situacao_cadastro sefazma:tipo_situacao ?t1.
-    }
-    FILTER(!BOUND(?t1))
+    
+    ?situacao_cadastro rdfs:label ?tipo_situacao2.
+    BIND(REPLACE(STR(?tipo_situacao2),"-.*","") as ?tipo_situacao_cadastro) 
+   
+    FILTER(?tipo_situacao_rfb != ?tipo_situacao_cadastro)
 }
 LIMIT 100""",
     'uri_var':"estabelecimento_rfb",
@@ -717,5 +728,6 @@ CONSTRUCT{
 } 
     """
 }
+
 
 saved_queries = [q2,q3,q4,q5,q6,q7,q8,q9,q10,q11,q12,q13,q14,q15]
