@@ -129,7 +129,7 @@ def list_resources(page,methods=['GET']):
     resources = []
     for result in results["results"]["bindings"]:
         resource = {'uri':urllib.parse.quote(result['resource']['value']),'label':result['label']['value'],'graphdb_url':GRAPHDB_BROWSER+"?config="+GRAPHDB_BROWSER_CONFIG+"&uri="+urllib.parse.quote(result['resource']['value'])+"&embedded"}
-        if "/" in resource['label']:
+        if "http://" in resource['label'] or "https://" in resource['label']:
             resource['label'] = resource['label'].split("/")[-1].split("#")[-1]
         resources.append(resource)
     return json.dumps(resources, ensure_ascii=False).encode('utf8')
