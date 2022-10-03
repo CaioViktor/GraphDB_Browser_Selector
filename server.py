@@ -37,6 +37,8 @@ sparql_ontology = SPARQLWrapper(ENDPOINT_ONTOLOGY)
 sparql_resources = SPARQLWrapper(ENDPOINT_RESOURCES)
 sparql_history = SPARQLWrapper(ENDPOINT_HISTORY)
 
+list_classes_destaque = ['http://www.sefaz.ma.gov.br/ontology/Contribuinte','http://xmlns.com/foaf/0.1/Organization','http://www.sefaz.ma.gov.br/ontology/Endereco','http://www.sefaz.ma.gov.br/ontology/Estabelecimento','http://www.sefaz.ma.gov.br/ontology/Fornecedor','http://xmlns.com/foaf/0.1/Person','http://www.sefaz.ma.gov.br/ontology/Socio',]
+
 # return redirect(url_for('controle_consistencias',mensagem=mensagem))
 
 app = Flask(__name__)
@@ -58,7 +60,7 @@ def classes():
     query = """
         prefix owl: <http://www.w3.org/2002/07/owl#>
         prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-        select ?class ?label where { 
+        select ?class ?label (GROUP_CONCAT(?c;separator=".\\n") as ?comment) where { 
             {
                 ?class a owl:Class.
             }
@@ -66,25 +68,31 @@ def classes():
                 ?class a rdfs:Class.
             }
             OPTIONAL{?class rdfs:label ?l}
+    		OPTIONAL{?class rdfs:comment ?c}
             BIND(COALESCE(?l,?class) AS ?label)
             FILTER(!CONTAINS(STR(?class),"http://www.w3.org/2000/01/rdf-schema#"))
             FILTER(!CONTAINS(STR(?class),"http://www.w3.org/2001/XMLSchema#"))
             FILTER(!CONTAINS(STR(?class),"http://www.w3.org/1999/02/22-rdf-syntax-ns#"))
             FILTER(!CONTAINS(STR(?class),"http://www.w3.org/2002/07/owl#"))
-        } ORDER BY ?label       
+        }GROUP BY ?class ?label
+        ORDER BY ?label  
+		     
     """
     sparql_ontology.setQuery(query)
     # print(query)
     sparql_ontology.setReturnFormat(JSON)
     results = sparql_ontology.query().convert()
-    properties = {}
     classes = []
+    classes_destaque = []
     for result in results["results"]["bindings"]:
-        class_ = {'uri':urllib.parse.quote(result['class']['value']),'label':result['label']['value']}
+            
+        class_ = {'uri':urllib.parse.quote(result['class']['value']),'uri_raw':result['class']['value'],'label':result['label']['value'],'comment':result['comment']['value']}
         if "/" in class_['label']:
             class_['label'] = class_['label'].split("/")[-1].split("#")[-1]
         classes.append(class_)
-    return json.dumps(classes, ensure_ascii=False).encode('utf8')
+        if result['class']['value'] in list_classes_destaque:
+            classes_destaque.append(class_)
+    return json.dumps({'classes':classes,'classes_destaque':classes_destaque}, ensure_ascii=False).encode('utf8')
 
 
 @app.route("/list_resources/<page>")
@@ -243,84 +251,84 @@ def query_saved(id,page):
 #     return render_template("atributo_data.html",classe=classe,atributo=atributo,data=data)
 
 
-@app.route("/get_historico")
-def get_historico():
-    uri = request.args.get('uri',default=None)
-    query = """
-    prefix owl: <http://www.w3.org/2002/07/owl#>
-    prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-    prefix tl: <http://purl.org/NET/c4dm/timeline.owl#>
-    prefix sfz: <http://www.sefaz.ma.gov.br/ontology/>
-    SELECT ?data ?n_serie ?campo  ?va ?vn WHERE {
-    <$uri> sfz:tem_timeLine ?tl.
-        ?inst tl:timeLine ?tl;
-        sfz:tem_atualizacao ?att;
-        tl:atDate ?data.
-    ?att sfz:valor_antigo ?va;
-        sfz:valor_novo ?vn;
-        sfz:atributo ?campo;
-        sfz:atributo_relacional ?campo_r;            
-        sfz:numero_serie ?n_serie.
-    }
-    ORDER BY ?data ?n_serie ?campo 
-    """.replace("$uri",uri)
+# @app.route("/get_historico")
+# def get_historico():
+#     uri = request.args.get('uri',default=None)
+#     query = """
+#     prefix owl: <http://www.w3.org/2002/07/owl#>
+#     prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+#     prefix tl: <http://purl.org/NET/c4dm/timeline.owl#>
+#     prefix sfz: <http://www.sefaz.ma.gov.br/ontology/>
+#     SELECT ?data ?n_serie ?campo  ?va ?vn WHERE {
+#     <$uri> sfz:tem_timeLine ?tl.
+#         ?inst tl:timeLine ?tl;
+#         sfz:tem_atualizacao ?att;
+#         tl:atDate ?data.
+#     ?att sfz:valor_antigo ?va;
+#         sfz:valor_novo ?vn;
+#         sfz:atributo ?campo;
+#         sfz:atributo_relacional ?campo_r;            
+#         sfz:numero_serie ?n_serie.
+#     }
+#     ORDER BY ?data ?n_serie ?campo 
+#     """.replace("$uri",uri)
     
-    sparql_history.setQuery(query)
-    # print(query)
-    sparql_history.setReturnFormat(JSON)
-    results = sparql_history.query().convert()
-    resources_historico_data = {}
-    for result in results["results"]["bindings"]:
-        data = result['data']['value']
-        if not data in resources_historico_data:
-            resources_historico_data[data]= {}
-        if not result['campo']['value'] in resources_historico_data[data]:
-            resources_historico_data[data][result['campo']['value']] = []
-        resources_historico_data[data][result['campo']['value']].append({'valor_antigo': result['va']['value'],'valor_novo': result['vn']['value']})
+#     sparql_history.setQuery(query)
+#     # print(query)
+#     sparql_history.setReturnFormat(JSON)
+#     results = sparql_history.query().convert()
+#     resources_historico_data = {}
+#     for result in results["results"]["bindings"]:
+#         data = result['data']['value']
+#         if not data in resources_historico_data:
+#             resources_historico_data[data]= {}
+#         if not result['campo']['value'] in resources_historico_data[data]:
+#             resources_historico_data[data][result['campo']['value']] = []
+#         resources_historico_data[data][result['campo']['value']].append({'valor_antigo': result['va']['value'],'valor_novo': result['vn']['value']})
     
 
-    resources_historico_propriedade = {}
-    for result in results["results"]["bindings"]:
-        data = result['data']['value']
-        propriedade = result['campo']['value']
-        if not propriedade in resources_historico_propriedade:
-            resources_historico_propriedade[propriedade]= {}
-        if not data in resources_historico_propriedade[propriedade]:
-            resources_historico_propriedade[propriedade][data] = []
-        resources_historico_propriedade[propriedade][data].append({'valor_antigo': result['va']['value'],'valor_novo': result['vn']['value']})
+#     resources_historico_propriedade = {}
+#     for result in results["results"]["bindings"]:
+#         data = result['data']['value']
+#         propriedade = result['campo']['value']
+#         if not propriedade in resources_historico_propriedade:
+#             resources_historico_propriedade[propriedade]= {}
+#         if not data in resources_historico_propriedade[propriedade]:
+#             resources_historico_propriedade[propriedade][data] = []
+#         resources_historico_propriedade[propriedade][data].append({'valor_antigo': result['va']['value'],'valor_novo': result['vn']['value']})
     
-    # query = """
+#     # query = """
     
-    # SELECT ?p ?o WHERE {
-    #     <$uri> ?p ?o
-    # }
-    # """.replace("$uri",uri)
+#     # SELECT ?p ?o WHERE {
+#     #     <$uri> ?p ?o
+#     # }
+#     # """.replace("$uri",uri)
     
-    # sparql_history.setQuery(query)
-    # # print(query)
-    # sparql_resources.setReturnFormat(JSON)
-    # results = sparql_resources.query().convert()
-    # resources_atual = {}
-    # for result in results["results"]["bindings"]:
-    #     data = result['data']['value']
-    #     if not data in resources_historico:
-    #         resources_historico[data]= []
-    #     att = {
-    #         result['campo']['value']:{
-    #             'valor_antigo': result['va']['value'],
-    #             'valor_novo': result['vn']['value']
-    #         }
-    #     }
-    #     resources_historico[data].append(att)
-    resources = {'resources_historico_propriedade':resources_historico_propriedade,'resources_historico_data':resources_historico_data}
-    return json.dumps(resources, ensure_ascii=False).encode('utf8')
+#     # sparql_history.setQuery(query)
+#     # # print(query)
+#     # sparql_resources.setReturnFormat(JSON)
+#     # results = sparql_resources.query().convert()
+#     # resources_atual = {}
+#     # for result in results["results"]["bindings"]:
+#     #     data = result['data']['value']
+#     #     if not data in resources_historico:
+#     #         resources_historico[data]= []
+#     #     att = {
+#     #         result['campo']['value']:{
+#     #             'valor_antigo': result['va']['value'],
+#     #             'valor_novo': result['vn']['value']
+#     #         }
+#     #     }
+#     #     resources_historico[data].append(att)
+#     resources = {'resources_historico_propriedade':resources_historico_propriedade,'resources_historico_data':resources_historico_data}
+#     return json.dumps(resources, ensure_ascii=False).encode('utf8')
 
 
-@app.route("/historico_recurso")
-def historico_recurso():
-    uri = request.args.get('uri',default=None)
+# @app.route("/historico_recurso")
+# def historico_recurso():
+#     uri = request.args.get('uri',default=None)
     
-    return render_template("historico_recurso.html",uri=uri)
+#     return render_template("historico_recurso.html",uri=uri)
 
 if __name__ == "__main__":
     # app.run(host='10.33.96.18',port=1111) #Colocar IP da máquina hospedeira (Servidor) aqui
