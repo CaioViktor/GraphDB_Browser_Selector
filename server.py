@@ -234,7 +234,7 @@ def get_properties(methods=['GET']):
     for classe in json.loads(classes())['classes']:
         classes_list[classe['uri_raw']] = classe['label']
     
-    return jsonify({'properties':properties,'propriedades_list':propriedades_list,'classes_list':classes_list})
+    return jsonify({'properties':properties,'propriedades_list':propriedades_list,'classes_list':classes_list,'graphdb_link':GRAPHDB_BROWSER+"?config="+GRAPHDB_BROWSER_CONFIG+"&uri="+urllib.parse.quote(uri)+"&embedded"})
 if __name__ == "__main__":
     # app.run(host='10.33.96.18',port=1111) #Colocar IP da máquina hospedeira (Servidor) aqui
     app.run(host='0.0.0.0',port=1111)

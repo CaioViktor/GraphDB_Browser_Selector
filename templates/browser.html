@@ -42,12 +42,7 @@
                     </div>
                 </header>
                 <div id="nav-bar">
-                    <a href="{{url_for('index')}}"><i class="fa-solid fa-circle-nodes"></i>Classes</a> 
-                    <!-- / <a
-                        href="{{url_for('resources',page=0,classRDF=classRDF,label=labelClassRDF)}}"><i
-                            class="fa-solid fa-diagram-project"></i> {{labelClassRDF}}</a> > <a
-                        href="{{url_for('browser',uri=uri,label=label,classRDF=classRDF,labelClassRDF=labelClassRDF)}}"><i
-                            class="fa-solid fa-eye"></i> {{label}}</a> -->
+                    <a href="{{url_for('index')}}"><i class="fa-solid fa-circle-nodes"></i>Classes</a> / <a href="{{url_for('browser',uri=uri)}}" id="nav-label"><i class="fa-solid fa-eye"></i> </a>
                 </div>
                 <div id="conteudo">
                     {{search_bar()}}
@@ -59,6 +54,7 @@
                                     <div class="section-heading">
                                         <div class="header-table">
                                             <i class="fa-solid fa-eye"></i> <b>Recurso</b>
+                                            <a id="grafoVisual" href="" target="_blank">Grafo Visual</a>
                                         </div>
                                     </div>
                                     <img src="{{url_for('static',filename='images/giphy.gif')}}" id="loading"
