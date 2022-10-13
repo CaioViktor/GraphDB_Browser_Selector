@@ -5,32 +5,18 @@ from flask import jsonify
 import json
 import urllib.parse
 
-# ENDPOINT_ONTOLOGY = "http://localhost:7200/repositories/onto"
-# ENDPOINT_RESOURCES = "http://localhost:7200/repositories/virtual"
-# GRAPHDB_BROWSER = "http://localhost:7200/graphs-visualizations"
-# GRAPHDB_BROWSER_CONFIG = "1b4a405cc5c4431dab894b1ee3e73fb9"
-
-# ENDPOINT_ONTOLOGY = "http://10.33.96.18:7200/repositories/ONTOLOGIA_DOMINIO"
-# ENDPOINT_RESOURCES = "http://10.33.96.18:7200/repositories/GRAFO_SEFAZMA"
-# GRAPHDB_BROWSER = "http://10.33.96.18:7200/graphs-visualizations"
-# GRAPHDB_BROWSER_CONFIG = "4fc22232f35e44878c819ee03543e852"
-
-
-# ENDPOINT_ONTOLOGY = "http://10.33.96.18:7200/repositories/ONTOLOGIA_ENDERECO"
-# ENDPOINT_RESOURCES = "http://10.33.96.18:7200/repositories/GRAFO_ENDERECO"
-# GRAPHDB_BROWSER = "http://10.33.96.18:7200/graphs-visualizations"
-# GRAPHDB_BROWSER_CONFIG = "4fc22232f35e44878c819ee03543e852"
-
-# ENDPOINT_ONTOLOGY = "http://10.33.96.18:7200/repositories/ONTOLOGIA_DOMINIO"
-# ENDPOINT_RESOURCES = "http://10.33.96.18:7200/repositories/GRAFO_SEFAZMA_TESTES"
-# GRAPHDB_BROWSER = "http://10.33.96.18:7200/graphs-visualizations"
-# GRAPHDB_BROWSER_CONFIG = "4fc22232f35e44878c819ee03543e852"
-
 
 ENDPOINT_ONTOLOGY = "http://10.33.96.18:7200/repositories/ONTOLOGIA_DOMINIO"
 ENDPOINT_RESOURCES = "http://10.33.96.18:7200/repositories/GRAFO_SEFAZMA_PRODUCAO"
 GRAPHDB_BROWSER = "http://10.33.96.18:7200/graphs-visualizations"
 GRAPHDB_BROWSER_CONFIG = "4fc22232f35e44878c819ee03543e852"
+USE_N_ARY_RELATIONS = False
+
+# ENDPOINT_ONTOLOGY = "http://localhost:7200/repositories/ONTOLOGIA_DOMINIO"
+# ENDPOINT_RESOURCES = "http://localhost:7200/repositories/Endereco"
+# GRAPHDB_BROWSER = "http://localhost:7200/graphs-visualizations"
+# GRAPHDB_BROWSER_CONFIG = "4fc22232f35e44878c819ee03543e852"
+# USE_N_ARY_RELATIONS = True
 
 sparql_ontology = SPARQLWrapper(ENDPOINT_ONTOLOGY)
 sparql_resources = SPARQLWrapper(ENDPOINT_RESOURCES)
@@ -214,21 +200,66 @@ def browser(methods=['GET']):
 @app.route("/get_properties")
 def get_properties(methods=['GET']):
     uri = request.args.get('uri',default="")
-    query = f"""
-        SELECT ?p ?o WHERE{{
-            <{uri}> ?p ?o.    
-        }} ORDER BY ?p		     
-    """
+    if not USE_N_ARY_RELATIONS:
+        query = f"""
+            SELECT ?p ?o WHERE{{
+                <{uri}> ?p ?o.    
+            }} ORDER BY ?p		     
+        """
+    else:
+        query = f"""
+            PREFIX sfz: <http://www.sefaz.ma.gov.br/ontology/>
+            select ?p ?o where {{ 
+                <{uri}> ?p ?o .
+                FILTER NOT EXISTS{{
+                    ?o a sfz:N_ary_Relation_Class 
+                }}
+            }} ORDER BY ?p	     
+        """
     sparql_resources.setQuery(query)
     # print(query)
     sparql_resources.setReturnFormat(JSON)
     results = sparql_resources.query().convert()
     properties = {}
+    metadatas = {}
     
     for result in results["results"]["bindings"]:
         if not result['p']['value'] in properties:
             properties[result['p']['value']] = []
-        properties[result['p']['value']].append(result['o']['value'])
+        properties[result['p']['value']].append([result['o']['value'],[]])
+
+    if USE_N_ARY_RELATIONS:
+        query = f"""
+            PREFIX sfz: <http://www.sefaz.ma.gov.br/ontology/>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            select ?p1 ?o1 ?p2  ?o2 where {{ 
+                <{uri}> ?p1 ?o_aux .
+                ?o_aux a sfz:N_ary_Relation_Class;
+                    rdf:objeto_referenciado ?o1;
+                    ?p2 ?o2.
+                FILTER(!CONTAINS(STR(?p2),"http://www.w3.org/2000/01/rdf-schema#"))
+                FILTER(!CONTAINS(STR(?p2),"http://www.w3.org/2001/XMLSchema#"))
+                FILTER(!CONTAINS(STR(?p2),"http://www.w3.org/1999/02/22-rdf-syntax-ns#"))
+                FILTER(!CONTAINS(STR(?p2),"http://www.w3.org/2002/07/owl#"))
+            }}  
+        """
+        sparql_resources.setQuery(query)
+        # print(query)
+        sparql_resources.setReturnFormat(JSON)
+        results = sparql_resources.query().convert()
+        
+        for result in results["results"]["bindings"]:
+            if not result['p1']['value'] in properties:
+                properties[result['p1']['value']] = []
+                metadatas[result['p1']['value']] = {}
+            if not result['o1']['value'] in metadatas[result['p1']['value']]:
+                metadatas[result['p1']['value']][result['o1']['value']] = []
+            metadatas[result['p1']['value']][result['o1']['value']].append([result['p2']['value'],result['o2']['value']])    
+        
+        for property in metadatas:
+            for value in metadatas[property]:
+                properties[property].append([value,metadatas[property][value]])
+        
     propriedades_list = json.loads(propriedades())['propriedades']
     classes_list = {}
     for classe in json.loads(classes())['classes']:
