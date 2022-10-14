@@ -21,7 +21,7 @@ USE_N_ARY_RELATIONS = False
 sparql_ontology = SPARQLWrapper(ENDPOINT_ONTOLOGY)
 sparql_resources = SPARQLWrapper(ENDPOINT_RESOURCES)
 
-list_classes_destaque = ['http://www.sefaz.ma.gov.br/ontology/Contribuinte','http://xmlns.com/foaf/0.1/Organization','http://www.sefaz.ma.gov.br/ontology/Endereco','http://www.sefaz.ma.gov.br/ontology/Estabelecimento','http://www.sefaz.ma.gov.br/ontology/Fornecedor','http://xmlns.com/foaf/0.1/Person','http://www.sefaz.ma.gov.br/ontology/Socio',]
+list_classes_destaque = ['http://xmlns.com/foaf/0.1/Organization','http://www.sefaz.ma.gov.br/ontology/Estabelecimento','http://www.sefaz.ma.gov.br/ontology/Fornecedor','http://xmlns.com/foaf/0.1/Person','http://www.sefaz.ma.gov.br/ontology/Produto']
 
 # return redirect(url_for('controle_consistencias',mensagem=mensagem))
 
@@ -69,9 +69,31 @@ def classes():
     classes = []
     classes_destaque = []
     for result in results["results"]["bindings"]:
-            
-        class_ = {'uri':urllib.parse.quote(result['class']['value']),'uri_raw':result['class']['value'],'label':result['label']['value'],'comment':result['comment']['value']}
-        if "/" in class_['label']:
+        query = f"""
+            prefix owl: <http://www.w3.org/2002/07/owl#>
+            prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            select ?sub ?label where {{ 
+                ?sub rdfs:subClassOf <{result['class']['value']}>.
+                OPTIONAL{{
+                    ?sub rdfs:label ?l.
+                }}
+                BIND(COALESCE(?l,?sub) AS ?label)
+            }}
+            ORDER BY ?label  
+        """
+        subclasses = []
+        sparql_ontology.setQuery(query)
+        # print(query)
+        sparql_ontology.setReturnFormat(JSON)
+        results_subclass = sparql_ontology.query().convert()
+        for result_subclass in results_subclass["results"]["bindings"]:
+            uri = result_subclass['sub']['value']
+            label = result_subclass['label']['value']
+            if 'http' in label:
+                label = label.split("/")[-1].split("#")[-1]
+            subclasses.append([uri,label])
+        class_ = {'uri':urllib.parse.quote(result['class']['value']),'uri_raw':result['class']['value'],'label':result['label']['value'],'comment':result['comment']['value'],'subclasses':subclasses}
+        if "http" in class_['label']:
             class_['label'] = class_['label'].split("/")[-1].split("#")[-1]
         classes.append(class_)
         if result['class']['value'] in list_classes_destaque:
@@ -106,7 +128,7 @@ def propriedades():
     for result in results["results"]["bindings"]:
             
         label = result['label']['value']
-        if "/" in label:
+        if "http" in label:
             label = label.split("/")[-1].split("#")[-1]
         propriedades[result['property']['value']] = label
 
@@ -264,8 +286,27 @@ def get_properties(methods=['GET']):
     classes_list = {}
     for classe in json.loads(classes())['classes']:
         classes_list[classe['uri_raw']] = classe['label']
-    
     return jsonify({'properties':properties,'propriedades_list':propriedades_list,'classes_list':classes_list,'graphdb_link':GRAPHDB_BROWSER+"?config="+GRAPHDB_BROWSER_CONFIG+"&uri="+urllib.parse.quote(uri)+"&embedded"})
+
+@app.route("/get_label")
+def getLabel(methods=['GET']):
+    uri = request.args.get('uri',default="")
+    query = f"""
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            select ?s (GROUP_CONCAT(?label;separator=".\\n") as ?label) where {{ 
+                BIND(<{uri}> as ?s)
+                ?s rdfs:label ?l.
+                BIND(COALESCE(?l,?s) AS ?label)
+            }} GROUP BY ?s
+        """
+    sparql_resources.setQuery(query)
+    # print(query)
+    sparql_resources.setReturnFormat(JSON)
+    results = sparql_resources.query().convert()
+    label = results["results"]["bindings"][0]['label']['value']
+    return {'label':label}
+
+
 if __name__ == "__main__":
     # app.run(host='10.33.96.18',port=1111) #Colocar IP da máquina hospedeira (Servidor) aqui
     app.run(host='0.0.0.0',port=1111)

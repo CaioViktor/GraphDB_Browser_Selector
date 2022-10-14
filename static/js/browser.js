@@ -44,7 +44,7 @@ const data = d3.json("/get_properties?uri="+uri).then(function(dataR){
                 label = d[0].split("/");
                 label = label[label.length-1];
                 label = label.split("#")
-                label = label[label.length-1].replace("_"," ");
+                label = label[label.length-1].replaceAll("_"," ");
             }
             row += '<a title="'+d[0]+'" href="/resources/0/?classRDF='+d[0]+'&label='+classes_list[d[0]]+'" id="'+d[0]+'" class="types">'+label+'</a>';
         });
@@ -52,7 +52,7 @@ const data = d3.json("/get_properties?uri="+uri).then(function(dataR){
         row += '</div>';
         $('#propriedades_destaque').append(row);
     }
-
+    let idx_prop = 0;
     for(property in dataR['properties']){
         if(!(propriedadesDestaque.includes(property))){
             let row = '<div id="'+property+'">';
@@ -62,13 +62,18 @@ const data = d3.json("/get_properties?uri="+uri).then(function(dataR){
                 let label = property.split("/");
                 label = label[label.length-1];
                 label = label.split("#")
-                label = label[label.length-1].replace("_"," ");
+                label = label[label.length-1].replaceAll("_"," ");
                 row += '<b title="'+property+'">'+label+'</b>';
             }
             row += '<ul>'
             dataR['properties'][property].forEach(function(d){
-                if(d[0].includes('http'))
-                    row += '<li><a href="/browser?uri='+d[0]+'">'+d[0]+'</a></li>';
+                if(d[0].includes('http')){
+                    row += '<li><a id="link_'+idx_prop+'" href="/browser?uri='+d[0]+'">'+d[0]+'</a></li>';
+                    const current_idx = idx_prop;
+                    label_object = d3.json("/get_label?uri="+d[0]).then(function(l_obj){
+                        $('#link_'+current_idx).text(l_obj['label']);
+                    });
+                }
                 else
                     row += '<li><p>'+d[0]+'</p></li>';
                 if(d[1].length > 0){
@@ -79,12 +84,13 @@ const data = d3.json("/get_properties?uri="+uri).then(function(dataR){
                             label = meta[0].split("/");
                             label = label[label.length-1];
                             label = label.split("#")
-                            label = label[label.length-1].replace("_"," ");
+                            label = label[label.length-1].replaceAll("_"," ");
                         }
                         row += '<li title="'+meta[0]+'"><b>'+label+':</b><p> '+meta[1]+'</p></li>';
                     });
                     row += '</ul>'
                 }
+                idx_prop+=1;
             });
             row += '</ul>'
             row += '</div>';
