@@ -71,7 +71,8 @@ const data = d3.json("/get_properties?uri="+uri).then(function(dataR){
                     row += '<li><a id="link_'+idx_prop+'" href="/browser?uri='+d[0]+'">'+d[0]+'</a></li>';
                     const current_idx = idx_prop;
                     label_object = d3.json("/get_label?uri="+d[0]).then(function(l_obj){
-                        $('#link_'+current_idx).text(l_obj['label']);
+                        if(l_obj['label'].trim().length > 0)
+                            $('#link_'+current_idx).text(l_obj['label']);
                     });
                 }
                 else
