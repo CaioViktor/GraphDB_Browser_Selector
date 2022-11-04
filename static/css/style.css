@@ -493,3 +493,8 @@ td, th{
 	text-decoration: underline;
 	text-transform: none;
 }
+.thumbnail{
+	height: 300px;
+	width: 300px;
+	margin: 10px;
+}

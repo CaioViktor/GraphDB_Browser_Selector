@@ -6,17 +6,23 @@ import json
 import urllib.parse
 
 
-ENDPOINT_ONTOLOGY = "http://10.33.96.18:7200/repositories/ONTOLOGIA_DOMINIO"
-ENDPOINT_RESOURCES = "http://10.33.96.18:7200/repositories/GRAFO_SEFAZMA_PRODUCAO"
-GRAPHDB_BROWSER = "http://10.33.96.18:7200/graphs-visualizations"
-GRAPHDB_BROWSER_CONFIG = "4fc22232f35e44878c819ee03543e852"
-USE_N_ARY_RELATIONS = False
 
-# ENDPOINT_ONTOLOGY = "http://localhost:7200/repositories/ONTOLOGIA_DOMINIO"
-# ENDPOINT_RESOURCES = "http://localhost:7200/repositories/Endereco"
-# GRAPHDB_BROWSER = "http://localhost:7200/graphs-visualizations"
+# ENDPOINT_ONTOLOGY = "http://localhost:7200/repositories/YOUR"#Endpoint for ontology
+# ENDPOINT_RESOURCES = "http://localhost:7200/repositories/YOUR"#Endpoint for resources
+# GRAPHDB_BROWSER = "http://localhost:7200/graphs-visualizations"#URL for browser graph-visualization
+# GRAPHDB_BROWSER_CONFIG = '' #set '' if uses default graph-visualization, '&config=ID' for custom graph-visualization config
+
+# ENDPOINT_ONTOLOGY = "http://10.33.96.18:7200/repositories/ONTOLOGIA_DOMINIO"
+# ENDPOINT_RESOURCES = "http://10.33.96.18:7200/repositories/GRAFO_SEFAZMA_PRODUCAO"
+# GRAPHDB_BROWSER = "http://10.33.96.18:7200/graphs-visualizations"
 # GRAPHDB_BROWSER_CONFIG = "4fc22232f35e44878c819ee03543e852"
-# USE_N_ARY_RELATIONS = True
+# USE_N_ARY_RELATIONS = False
+
+ENDPOINT_ONTOLOGY = "http://localhost:7200/repositories/ONTOLOGIA_DOMINIO"
+ENDPOINT_RESOURCES = "http://localhost:7200/repositories/Endereco"
+GRAPHDB_BROWSER = "http://localhost:7200/graphs-visualizations"
+GRAPHDB_BROWSER_CONFIG = "&config=ce05fb50c18a4de69d59be186eb6acc5"
+USE_N_ARY_RELATIONS = True
 
 sparql_ontology = SPARQLWrapper(ENDPOINT_ONTOLOGY)
 sparql_resources = SPARQLWrapper(ENDPOINT_RESOURCES)
@@ -176,7 +182,7 @@ def list_resources(page,methods=['GET']):
     results = sparql_resources.query().convert()
     resources = []
     for result in results["results"]["bindings"]:
-        resource = {'uri':urllib.parse.quote(result['resource']['value']),'label':result['label']['value'],'graphdb_url':GRAPHDB_BROWSER+"?config="+GRAPHDB_BROWSER_CONFIG+"&uri="+urllib.parse.quote(result['resource']['value'])+"&embedded"}
+        resource = {'uri':urllib.parse.quote(result['resource']['value']),'label':result['label']['value'],'graphdb_url':GRAPHDB_BROWSER+"?uri="+urllib.parse.quote(result['resource']['value'])+GRAPHDB_BROWSER_CONFIG+"&embedded"}
         if "http://" in resource['label'] or "https://" in resource['label']:
             resource['label'] = resource['label'].split("/")[-1].split("#")[-1]
         resources.append(resource)
@@ -207,7 +213,7 @@ def query_saved(id,page):
     resources = []
     for result in results["results"]["bindings"]:
         query_construct = item['construct_query'].replace("$URI",result[item['uri_var']]['value']) 
-        resource = {'graphdb_url':GRAPHDB_BROWSER+"?config="+GRAPHDB_BROWSER_CONFIG+"&query="+urllib.parse.quote(query_construct)+"&embedded"}
+        resource = {'graphdb_url':GRAPHDB_BROWSER+"?query="+urllib.parse.quote(query_construct)+GRAPHDB_BROWSER_CONFIG+"&embedded"}
         for var in result:
             resource[var] = result[var]['value']
         resources.append(resource)
@@ -286,7 +292,7 @@ def get_properties(methods=['GET']):
     classes_list = {}
     for classe in json.loads(classes())['classes']:
         classes_list[classe['uri_raw']] = classe['label']
-    return jsonify({'properties':properties,'propriedades_list':propriedades_list,'classes_list':classes_list,'graphdb_link':GRAPHDB_BROWSER+"?config="+GRAPHDB_BROWSER_CONFIG+"&uri="+urllib.parse.quote(uri)+"&embedded"})
+    return jsonify({'properties':properties,'propriedades_list':propriedades_list,'classes_list':classes_list,'graphdb_link':GRAPHDB_BROWSER+"?uri="+urllib.parse.quote(uri)+str(GRAPHDB_BROWSER_CONFIG)+"&embedded"})
 
 @app.route("/get_label")
 def getLabel(methods=['GET']):
@@ -303,7 +309,10 @@ def getLabel(methods=['GET']):
     # print(query)
     sparql_resources.setReturnFormat(JSON)
     results = sparql_resources.query().convert()
-    label = results["results"]["bindings"][0]['label']['value']
+    if len(results["results"]["bindings"]) > 0:
+        label = results["results"]["bindings"][0]['label']['value']
+    else:
+        label = ""
     return {'label':label}
 
 
