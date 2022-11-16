@@ -1,7 +1,7 @@
-const propriedadesDestaque = ['http://www.w3.org/2000/01/rdf-schema#label','http://www.w3.org/1999/02/22-rdf-syntax-ns#type','http://www.w3.org/2000/01/rdf-schema#comment','http://dbpedia.org/ontology/thumbnail','http://xmlns.com/foaf/0.1/thumbnail','http://xmlns.com/foaf/0.1/img'];
+const propriedadesDestaque = ['http://www.w3.org/2000/01/rdf-schema#label','http://www.w3.org/1999/02/22-rdf-syntax-ns#type','http://www.w3.org/2000/01/rdf-schema#comment','http://dbpedia.org/ontology/thumbnail','http://xmlns.com/foaf/0.1/thumbnail','http://xmlns.com/foaf/0.1/img','http://www.sefaz.ma.gov.br/ontology/tem_timeLine'];
 let propriedades_list = null;
 let classes_list = null;
-const data = d3.json("/get_properties?uri="+uri).then(function(dataR){
+const data = d3.json("/get_properties?uri="+encodeURI(uri)).then(function(dataR){
 	let data = dataR;
 	
     classes_list = dataR['classes_list'];
@@ -9,6 +9,11 @@ const data = d3.json("/get_properties?uri="+uri).then(function(dataR){
     let properties = dataR['properties'];
     
     $("#grafoVisual")[0].href=dataR['graphdb_link'];
+
+    if('http://www.sefaz.ma.gov.br/ontology/tem_timeLine' in properties){//Recurso tem timeline
+        $("#timeline")[0].href='timeline?uri='+encodeURI(uri);
+        $("#timeline").show();
+    }
 
 
     if(['http://dbpedia.org/ontology/thumbnail','http://xmlns.com/foaf/0.1/thumbnail','http://xmlns.com/foaf/0.1/img'].some(el=> el in properties) ){//Thumbnails

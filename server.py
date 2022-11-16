@@ -12,20 +12,22 @@ import urllib.parse
 # GRAPHDB_BROWSER = "http://localhost:7200/graphs-visualizations"#URL for browser graph-visualization
 # GRAPHDB_BROWSER_CONFIG = '' #set '' if uses default graph-visualization, '&config=ID' for custom graph-visualization config
 
-ENDPOINT_ONTOLOGY = "http://10.33.96.18:7200/repositories/ONTOLOGIA_DOMINIO"
-ENDPOINT_RESOURCES = "http://10.33.96.18:7200/repositories/GRAFO_SEFAZMA_PRODUCAO"
-GRAPHDB_BROWSER = "http://10.33.96.18:7200/graphs-visualizations"
-GRAPHDB_BROWSER_CONFIG = "4fc22232f35e44878c819ee03543e852"
-USE_N_ARY_RELATIONS = False
+# ENDPOINT_ONTOLOGY = "http://10.33.96.18:7200/repositories/ONTOLOGIA_DOMINIO"
+# ENDPOINT_RESOURCES = "http://10.33.96.18:7200/repositories/GRAFO_SEFAZMA_PRODUCAO"
+# GRAPHDB_BROWSER = "http://10.33.96.18:7200/graphs-visualizations"
+# GRAPHDB_BROWSER_CONFIG = "4fc22232f35e44878c819ee03543e852"
+# USE_N_ARY_RELATIONS = False
 
-# ENDPOINT_ONTOLOGY = "http://localhost:7200/repositories/ONTOLOGIA_DOMINIO"
-# ENDPOINT_RESOURCES = "http://localhost:7200/repositories/Endereco"
-# GRAPHDB_BROWSER = "http://localhost:7200/graphs-visualizations"
-# GRAPHDB_BROWSER_CONFIG = "&config=ce05fb50c18a4de69d59be186eb6acc5"
-# USE_N_ARY_RELATIONS = True
+ENDPOINT_ONTOLOGY = "http://localhost:7200/repositories/ONTOLOGIA_DOMINIO"
+ENDPOINT_RESOURCES = "http://localhost:7200/repositories/Endereco"
+ENDPOINT_HISTORY = "http://localhost:7200/repositories/Endereco"
+GRAPHDB_BROWSER = "http://localhost:7200/graphs-visualizations"
+GRAPHDB_BROWSER_CONFIG = "&config=ce05fb50c18a4de69d59be186eb6acc5"
+USE_N_ARY_RELATIONS = True
 
 sparql_ontology = SPARQLWrapper(ENDPOINT_ONTOLOGY)
 sparql_resources = SPARQLWrapper(ENDPOINT_RESOURCES)
+sparql_history = SPARQLWrapper(ENDPOINT_HISTORY)
 
 list_classes_destaque = ['http://xmlns.com/foaf/0.1/Organization','http://www.sefaz.ma.gov.br/ontology/Estabelecimento','http://www.sefaz.ma.gov.br/ontology/Fornecedor','http://xmlns.com/foaf/0.1/Person','http://www.sefaz.ma.gov.br/ontology/Produto']
 
@@ -314,6 +316,56 @@ def getLabel(methods=['GET']):
     else:
         label = ""
     return {'label':label}
+
+@app.route("/timeline")
+def timeline(methods=['GET']):
+    uri = request.args.get('uri',default="")
+    return render_template("timeline.html",uri=uri)
+
+@app.route("/get_historico")
+def get_historico():
+    uri = request.args.get('uri',default=None)
+    query = """
+    prefix owl: <http://www.w3.org/2002/07/owl#>
+    prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    prefix tl: <http://purl.org/NET/c4dm/timeline.owl#>
+    prefix sfz: <http://www.sefaz.ma.gov.br/ontology/>
+    SELECT ?data ?n_serie ?campo  ?va ?vn WHERE {
+    <$uri> sfz:tem_timeLine ?tl.
+        ?inst tl:timeLine ?tl;
+        sfz:tem_atualizacao ?att;
+        tl:atDate ?data.
+    ?att sfz:valor_antigo ?va;
+        sfz:valor_novo ?vn;
+        sfz:atributo ?campo;
+        sfz:atributo_relacional ?campo_r;            
+        sfz:numero_serie ?n_serie.
+    }
+    ORDER BY ?data ?n_serie ?campo 
+    """.replace("$uri",uri)
+    sparql_history.setQuery(query)
+    # print(query)
+    sparql_history.setReturnFormat(JSON)
+    results = sparql_history.query().convert()
+    resources_historico_data = {}
+    for result in results["results"]["bindings"]:
+        data = result['data']['value']
+        if not data in resources_historico_data:
+            resources_historico_data[data]= {}
+        if not result['campo']['value'] in resources_historico_data[data]:
+            resources_historico_data[data][result['campo']['value']] = []
+        resources_historico_data[data][result['campo']['value']].append({'valor_antigo': result['va']['value'],'valor_novo': result['vn']['value']})
+    resources_historico_propriedade = {}
+    for result in results["results"]["bindings"]:
+        data = result['data']['value']
+        propriedade = result['campo']['value']
+        if not propriedade in resources_historico_propriedade:
+            resources_historico_propriedade[propriedade]= {}
+        if not data in resources_historico_propriedade[propriedade]:
+            resources_historico_propriedade[propriedade][data] = []
+        resources_historico_propriedade[propriedade][data].append({'valor_antigo': result['va']['value'],'valor_novo': result['vn']['value']})
+    resources = {'resources_historico_propriedade':resources_historico_propriedade,'resources_historico_data':resources_historico_data}
+    return json.dumps(resources, ensure_ascii=False).encode('utf8')
 
 
 if __name__ == "__main__":
