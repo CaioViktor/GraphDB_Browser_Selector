@@ -56,11 +56,14 @@
                                     <div class="section-heading">
                                         <div class="header-table">
                                             <i class="fa-solid fa-timeline"></i> <b>Timeline</b>
+                                            <select id="timeline_filter" onchange="selectTimeline(this);">
+                                            </select>
                                         </div>
                                     </div>
                                     <img src="{{url_for('static',filename='images/giphy.gif')}}" id="loading" class="loading"/>
                                     <div class="container-fluid">
-                                        <div id="timeline" class="row">
+                                        
+                                        <div id="timeline">
 
                                         </div>
                                     </div>

@@ -4,20 +4,21 @@ let classes_list = null;
 const data = d3.json("/get_historico?uri="+encodeURI(uri)).then(function(dataR){
 	let data = dataR;
     
-
-    let content = '<div class="timeline">';
+    let count = 0;
+    let content = '<div id="timeline_all" class="timeline">';//Timeline todas as propriedades
     content+='<div class="timeline__wrap">';
     content+='<div class="timeline__items">';
-    for(dataI in dataR['resources_historico_data']){
+    for(dataI in dataR['resources_historico_data']){//Loop para pegar todas as datas para todas as propriedades
         let date = new Date(dataI);
         content+='<div class="timeline__item">';
         content+='<div class="timeline__content">';
         content+= '<h2>'+date.toLocaleString('pt-br')+'</h2><ul>';
-        for(propriedade in dataR['resources_historico_data'][dataI]){
+        for(propriedade in dataR['resources_historico_data'][dataI]){//Loop pára pegar as propriedades atualizadas
             let propriedadeTitle = propriedade.replaceAll("/",' / ');
             content+='<li><b>'+propriedadeTitle+'</b></li><ul>';
-            dataR['resources_historico_data'][dataI][propriedade].forEach(function(att){
+            dataR['resources_historico_data'][dataI][propriedade].forEach(function(att){//loop para pegar as atualizações para uma propriedade em uma data
                 content+='<li><span style="color:red;">'+att['valor_antigo']+'</span> <i class="fa-solid fa-arrow-right"></i> <span style="color:green;">'+att['valor_novo']+'</span></li>';
+                count+=1;
             });
             content+='</ul>';
         }
@@ -30,16 +31,43 @@ const data = d3.json("/get_historico?uri="+encodeURI(uri)).then(function(dataR){
     
     
         
-            
-            
-
-
-	$("#loading").hide();
     $('#timeline').append(content);
+    $('#timeline_filter').append('<option value="timeline_all">Todos'+' ('+count+')</option>');
+
+    for(propriedade in dataR['resources_historico_propriedade']){
+        let count = 0;
+        let propriedadeID= propriedade.replaceAll(":","_").replaceAll(",","_").replaceAll("/","_").replaceAll(" ","_").replaceAll(";","");
+        content = '<div id="timeline_'+propriedadeID+'" class="timeline" style="display:none;">';
+        content+='<div class="timeline__wrap">';
+        content+='<div class="timeline__items">';
+        for(dataI in dataR['resources_historico_propriedade'][propriedade]){//Loop para pegar todas as datas para todas as propriedades
+            let date = new Date(dataI);
+            content+='<div class="timeline__item">';
+            content+='<div class="timeline__content">';
+            content+= '<h2>'+date.toLocaleString('pt-br')+'</h2><ul>';
+           
+            dataR['resources_historico_propriedade'][propriedade][dataI].forEach(function(att){
+                content+='<li><span style="color:red;">'+att['valor_antigo']+'</span> <i class="fa-solid fa-arrow-right"></i> <span style="color:green;">'+att['valor_novo']+'</span></li>';
+                count+=1;
+            });
+            content+='</ul></div>';
+            content+='</div>';
+        }
+        content+='</div>';
+        content+='</div>';
+        content+='</div>';
+        $('#timeline').append(content);
+        $('#timeline_filter').append('<option value="timeline_'+propriedadeID+'">'+propriedade+' ('+count+')</option>');
+    }
+    $("#loading").hide();
     timeline(document.querySelectorAll('.timeline'),{
         forceVerticalMode: 600
     });
 	return data;
 });
 
+function selectTimeline(el){
+    $(".timeline").hide();
+    $("#"+el.value).show();
+}
 

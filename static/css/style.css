@@ -506,3 +506,7 @@ td, th{
 #timeline{
 	margin-left: 20px;
 }
+#timeline_filter{
+	float: right;
+	margin-right: 10px;
+}
