@@ -12,18 +12,18 @@ import urllib.parse
 # GRAPHDB_BROWSER = "http://localhost:7200/graphs-visualizations"#URL for browser graph-visualization
 # GRAPHDB_BROWSER_CONFIG = '' #set '' if uses default graph-visualization, '&config=ID' for custom graph-visualization config
 
-# ENDPOINT_ONTOLOGY = "http://10.33.96.18:7200/repositories/ONTOLOGIA_DOMINIO"
-# ENDPOINT_RESOURCES = "http://10.33.96.18:7200/repositories/GRAFO_SEFAZMA_PRODUCAO"
-# GRAPHDB_BROWSER = "http://10.33.96.18:7200/graphs-visualizations"
-# GRAPHDB_BROWSER_CONFIG = "4fc22232f35e44878c819ee03543e852"
-# USE_N_ARY_RELATIONS = False
+ENDPOINT_ONTOLOGY = "http://10.33.96.18:7200/repositories/ONTOLOGIA_DOMINIO"
+ENDPOINT_RESOURCES = "http://10.33.96.18:7200/repositories/GRAFO_SEFAZMA_PRODUCAO"
+GRAPHDB_BROWSER = "http://10.33.96.18:7200/graphs-visualizations"
+GRAPHDB_BROWSER_CONFIG = "63b76b9865064cd8a9775e1e2f46ff4d"
+USE_N_ARY_RELATIONS = False
 
-ENDPOINT_ONTOLOGY = "http://localhost:7200/repositories/ONTOLOGIA_DOMINIO"
-ENDPOINT_RESOURCES = "http://localhost:7200/repositories/Endereco"
-ENDPOINT_HISTORY = "http://localhost:7200/repositories/Endereco"
-GRAPHDB_BROWSER = "http://localhost:7200/graphs-visualizations"
-GRAPHDB_BROWSER_CONFIG = "&config=ce05fb50c18a4de69d59be186eb6acc5"
-USE_N_ARY_RELATIONS = True
+# ENDPOINT_ONTOLOGY = "http://localhost:7200/repositories/ONTOLOGIA_DOMINIO"
+# ENDPOINT_RESOURCES = "http://localhost:7200/repositories/Endereco"
+# ENDPOINT_HISTORY = "http://localhost:7200/repositories/Endereco"
+# GRAPHDB_BROWSER = "http://localhost:7200/graphs-visualizations"
+# GRAPHDB_BROWSER_CONFIG = "&config=ce05fb50c18a4de69d59be186eb6acc5"
+# USE_N_ARY_RELATIONS = True
 
 sparql_ontology = SPARQLWrapper(ENDPOINT_ONTOLOGY)
 sparql_resources = SPARQLWrapper(ENDPOINT_RESOURCES)
