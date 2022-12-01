@@ -21,7 +21,7 @@ const data = d3.json("/get_properties?uri="+encodeURI(uri)).then(function(dataR)
         ['http://dbpedia.org/ontology/thumbnail','http://xmlns.com/foaf/0.1/thumbnail','http://xmlns.com/foaf/0.1/img'].forEach(function(attr){
             if(attr in dataR['properties']){
                     dataR['properties'][attr].forEach(function(d){
-                        row += '<a href="'+d[0]+'" target="_blank"><img src="'+d[0]+'" alt="'+d[0]+'" title="'+d[0]+'" class="thumbnail"/></a>';
+                        row += '<a href="'+encodeURI(d[0])+'" target="_blank"><img src="'+d[0]+'" alt="'+d[0]+'" title="'+d[0]+'" class="thumbnail"/></a>';
                     });
                 }
             });
@@ -65,7 +65,7 @@ const data = d3.json("/get_properties?uri="+encodeURI(uri)).then(function(dataR)
                 label = label.split("#")
                 label = label[label.length-1].replaceAll("_"," ");
             }
-            row += '<a title="'+d[0]+'" href="/resources/0/?classRDF='+d[0]+'&label='+classes_list[d[0]]+'" id="'+d[0]+'" class="types">'+label+'</a>';
+            row += '<a title="'+d[0]+'" href="/resources/0/?classRDF='+encodeURI(d[0])+'&label='+classes_list[d[0]]+'" id="'+d[0]+'" class="types">'+label+'</a>';
         });
         row += '</div>';
         row += '</div>';
@@ -88,12 +88,12 @@ const data = d3.json("/get_properties?uri="+encodeURI(uri)).then(function(dataR)
             dataR['properties'][property].forEach(function(d){
                 if(d[0].includes('http')){ //Propriedade é uma objectProperty
                     if(['.png','.jpeg','.jpg','.gif','.svg','.ico','.apng','.bmp'].some(typ=>d[0].includes(typ))){//Propriedade é um link para uma imagem
-                        row += '<li><a href="'+d[0]+'" target="_blank"><img src="'+d[0]+'" alt="'+d[0]+'" title="'+d[0]+'" class="thumbnail"/></a></li>';
+                        row += '<li><a href="'+encodeURI(d[0])+'" target="_blank"><img src="'+d[0]+'" alt="'+d[0]+'" title="'+d[0]+'" class="thumbnail"/></a></li>';
                     }
                     else{//Propriedade é uma objectProperty qualquer
-                        row += '<li><a id="link_'+idx_prop+'" href="/browser?uri='+d[0]+'">'+d[0]+'</a></li>';
+                        row += '<li><a id="link_'+idx_prop+'" href="/browser?uri='+encodeURI(d[0])+'">'+d[0]+'</a></li>';
                         const current_idx = idx_prop;
-                        label_object = d3.json("/get_label?uri="+d[0]).then(function(l_obj){
+                        label_object = d3.json("/get_label?uri="+encodeURI(d[0])).then(function(l_obj){
                             if(l_obj['label'].trim().length > 0)
                                 $('#link_'+current_idx).text(l_obj['label']);
                         });
