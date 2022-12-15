@@ -36,8 +36,8 @@ import urllib.parse
 # ENDPOINT_ONTOLOGY = "http://10.33.96.18:7200/repositories/ONTOLOGIA_DOMINIO"
 # ENDPOINT_RESOURCES = "http://10.33.96.18:7200/repositories/Estudo_Timeline"
 # ENDPOINT_HISTORY = "http://10.33.96.18:7200/repositories/Estudo_Timeline"
-# GRAPHDB_BROWSER = "http://localhost:7200/graphs-visualizations"
-# GRAPHDB_BROWSER_CONFIG = "?config=63b76b9865064cd8a9775e1e2f46ff4d"
+# GRAPHDB_BROWSER = "http://10.33.96.18:7200/graphs-visualizations"
+# GRAPHDB_BROWSER_CONFIG = "&config=63b76b9865064cd8a9775e1e2f46ff4d"
 # USE_N_ARY_RELATIONS = True
 
 
@@ -45,8 +45,8 @@ import urllib.parse
 ENDPOINT_ONTOLOGY = "http://10.33.96.18:7200/repositories/ONTOLOGIA_EXTRACADASTRO"
 ENDPOINT_RESOURCES = "http://10.33.96.18:7200/repositories/EXTRACADASTRO"
 ENDPOINT_HISTORY = "http://10.33.96.18:7200/repositories/EXTRACADASTRO"
-GRAPHDB_BROWSER = "http://localhost:7200/graphs-visualizations"
-GRAPHDB_BROWSER_CONFIG = "?config=63b76b9865064cd8a9775e1e2f46ff4d"
+GRAPHDB_BROWSER = "http://10.33.96.18:7200/graphs-visualizations"
+GRAPHDB_BROWSER_CONFIG = "&config=63b76b9865064cd8a9775e1e2f46ff4d"
 USE_N_ARY_RELATIONS = False
 
 sparql_ontology = SPARQLWrapper(ENDPOINT_ONTOLOGY)
