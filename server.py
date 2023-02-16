@@ -24,21 +24,21 @@ import urllib.parse
 # USE_N_ARY_RELATIONS = False
 
 #LOCAL
-# ENDPOINT_ONTOLOGY = "http://localhost:7200/repositories/ONTOLOGIA_DOMINIO"
-# ENDPOINT_RESOURCES = "http://localhost:7200/repositories/Endereco"
-# ENDPOINT_HISTORY = "http://localhost:7200/repositories/Endereco"
-# GRAPHDB_BROWSER = "http://localhost:7200/graphs-visualizations"
-# GRAPHDB_BROWSER_CONFIG = "&config=ce05fb50c18a4de69d59be186eb6acc5"
-# USE_N_ARY_RELATIONS = True
+ENDPOINT_ONTOLOGY = "http://localhost:7200/repositories/ONTOLOGIA_DOMINIO"
+ENDPOINT_RESOURCES = "http://localhost:7200/repositories/Endereco"
+ENDPOINT_HISTORY = "http://localhost:7200/repositories/Endereco"
+GRAPHDB_BROWSER = "http://localhost:7200/graphs-visualizations"
+GRAPHDB_BROWSER_CONFIG = "&config=ce05fb50c18a4de69d59be186eb6acc5"
+USE_N_ARY_RELATIONS = True
 
 
 #Timeline
-ENDPOINT_ONTOLOGY = "http://10.33.96.18:7200/repositories/ONTOLOGIA_DOMINIO"
-ENDPOINT_RESOURCES = "http://10.33.96.18:7200/repositories/Estudo_Timeline"
-ENDPOINT_HISTORY = "http://10.33.96.18:7200/repositories/Estudo_Timeline"
-GRAPHDB_BROWSER = "http://10.33.96.18:7200/graphs-visualizations"
-GRAPHDB_BROWSER_CONFIG = "&config=63b76b9865064cd8a9775e1e2f46ff4d"
-USE_N_ARY_RELATIONS = True
+# ENDPOINT_ONTOLOGY = "http://10.33.96.18:7200/repositories/ONTOLOGIA_DOMINIO"
+# ENDPOINT_RESOURCES = "http://10.33.96.18:7200/repositories/Estudo_Timeline"
+# ENDPOINT_HISTORY = "http://10.33.96.18:7200/repositories/Estudo_Timeline"
+# GRAPHDB_BROWSER = "http://10.33.96.18:7200/graphs-visualizations"
+# GRAPHDB_BROWSER_CONFIG = "&config=63b76b9865064cd8a9775e1e2f46ff4d"
+# USE_N_ARY_RELATIONS = True
 
 
 #EXTRACAD
@@ -356,7 +356,7 @@ def get_historico():
     prefix sfz: <http://www.sefaz.ma.gov.br/ontology/>
     SELECT ?data ?n_serie ?campo  ?va ?vn WHERE {
     <$uri> sfz:tem_timeLine ?tl.
-        ?inst tl:timeLine ?tl;
+    ?inst tl:timeLine ?tl;
         sfz:tem_atualizacao ?att;
         tl:atDate ?data.
     ?att sfz:valor_antigo ?va;
@@ -388,6 +388,56 @@ def get_historico():
         if not data in resources_historico_propriedade[propriedade]:
             resources_historico_propriedade[propriedade][data] = []
         resources_historico_propriedade[propriedade][data].append({'valor_antigo': result['va']['value'],'valor_novo': result['vn']['value']})
+
+    
+    query = """
+    prefix owl: <http://www.w3.org/2002/07/owl#>
+    prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    prefix tl: <http://purl.org/NET/c4dm/timeline.owl#>
+    prefix sfz: <http://www.sefaz.ma.gov.br/ontology/>
+    SELECT DISTINCT ?data WHERE {
+        <$uri> sfz:tem_timeLine ?tl.
+        ?inst tl:timeLine ?tl;
+            sfz:tem_insercao ?att;
+            tl:atDate ?data.
+    }
+    """.replace("$uri",uri)
+    sparql_history.setQuery(query)
+    # print(query)
+    sparql_history.setReturnFormat(JSON)
+    results = sparql_history.query().convert()
+    for ins in results["results"]["bindings"]:
+        data = ins['data']['value']
+        if not data in resources_historico_data:
+            resources_historico_data[data] = {}
+        if not 'INS' in resources_historico_data[data]:
+            resources_historico_data[data]['INS'] = []
+
+
+
+    query = """
+    prefix owl: <http://www.w3.org/2002/07/owl#>
+    prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    prefix tl: <http://purl.org/NET/c4dm/timeline.owl#>
+    prefix sfz: <http://www.sefaz.ma.gov.br/ontology/>
+    SELECT DISTINCT ?data WHERE {
+        <$uri> sfz:tem_timeLine ?tl.
+        ?inst tl:timeLine ?tl;
+            sfz:tem_remocao ?att;
+            tl:atDate ?data.
+    }
+    """.replace("$uri",uri)
+    sparql_history.setQuery(query)
+    # print(query)
+    sparql_history.setReturnFormat(JSON)
+    results = sparql_history.query().convert()
+    for dell in results["results"]["bindings"]:
+        data = dell['data']['value']
+        if not data in resources_historico_data:
+            resources_historico_data[data] = {}
+        if not 'DEL' in resources_historico_data[data]:
+            resources_historico_data[data]['DEL'] = []
+    resources_historico_data = dict(sorted(resources_historico_data.items()))
     resources = {'resources_historico_propriedade':resources_historico_propriedade,'resources_historico_data':resources_historico_data}
     return json.dumps(resources, ensure_ascii=False).encode('utf8')
 
