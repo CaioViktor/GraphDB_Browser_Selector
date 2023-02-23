@@ -20,17 +20,34 @@ const data = d3.json("/get_historico?uri="+encodeURI(uri)).then(function(dataR){
         for(propriedade in dataR['resources_historico_data'][dataI]){//Loop pára pegar as propriedades atualizadas
             let propriedadeTitle = propriedade.replaceAll("/",' / ');
             if(propriedade=="INS"){
-                content+='<li><span style="color:green;">**INSERÇÃO**</span></li>';
+                content+='<li><span style="color:green;">**INSERÇÃO DE INSTÂNCIA**</span></li>';
+                count+=1;
             }else if(propriedade=="DEL"){
-                content+='<li><span style="color:red;">**REMOÇÃO**</span></li>';
-            }else{
+                content+='<li><span style="color:red;">**REMOÇÃO DE INSTÂNCIA**</span></li>';
+                count+=1;
+            }else if(propriedade=="INS_PROP"){
+                content+='<li><span style="color:green;">**INSERÇÃO DE RELACIONAMENTO**</span></li><ul>';
+                dataR['resources_historico_data'][dataI][propriedade].forEach(function(att){//loop para pegar as atualizações para uma propriedade em uma data
+                    content+='<li><b>'+att[0]+'</b>: <span style="color:green;">'+att[1]+'</span></li>';
+                    count+=1;
+                });
+                content+='</ul>';
+            }else if(propriedade=="REM_PROP"){
+                content+='<li><span style="color:red;">**REMOÇÃO DE RELACIONAMENTO**</span></li><ul>';
+                dataR['resources_historico_data'][dataI][propriedade].forEach(function(att){//loop para pegar as atualizações para uma propriedade em uma data
+                    content+='<li><b>'+att[0]+'</b>: <span style="color:red;">'+att[1]+'</span></li>';
+                    count+=1;
+                });
+                content+='</ul>';
+            }
+            else{
                 content+='<li><b>'+propriedadeTitle+'</b></li><ul>';
                 dataR['resources_historico_data'][dataI][propriedade].forEach(function(att){//loop para pegar as atualizações para uma propriedade em uma data
                     content+='<li><span style="color:red;">'+att['valor_antigo']+'</span> <i class="fa-solid fa-arrow-right"></i> <span style="color:green;">'+att['valor_novo']+'</span></li>';
                     count+=1;
                 });
+                content+='</ul>';
             }
-            content+='</ul>';
         }
         content+='</ul></div>';
         content+='</div>';
