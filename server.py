@@ -30,12 +30,12 @@ import urllib.parse
 # GRAPHDB_BROWSER = "http://localhost:7200/graphs-visualizations"
 # GRAPHDB_BROWSER_CONFIG = "&config=ce05fb50c18a4de69d59be186eb6acc5"
 # USE_N_ARY_RELATIONS = True
-ENDPOINT_ONTOLOGY = "http://localhost:7200/repositories/Test"
-ENDPOINT_RESOURCES = "http://localhost:7200/repositories/Test"
-ENDPOINT_HISTORY = "http://localhost:7200/repositories/Test"
-GRAPHDB_BROWSER = "http://localhost:7200/graphs-visualizations"
-GRAPHDB_BROWSER_CONFIG = "&config=ce05fb50c18a4de69d59be186eb6acc5"
-USE_N_ARY_RELATIONS = True
+# ENDPOINT_ONTOLOGY = "http://localhost:7200/repositories/Test"
+# ENDPOINT_RESOURCES = "http://localhost:7200/repositories/Test"
+# ENDPOINT_HISTORY = "http://localhost:7200/repositories/Test"
+# GRAPHDB_BROWSER = "http://localhost:7200/graphs-visualizations"
+# GRAPHDB_BROWSER_CONFIG = "&config=ce05fb50c18a4de69d59be186eb6acc5"
+# USE_N_ARY_RELATIONS = True
 
 
 #Timeline
@@ -47,7 +47,7 @@ USE_N_ARY_RELATIONS = True
 # USE_N_ARY_RELATIONS = True
 
 
-#EXTRACAD
+# EXTRACAD
 # ENDPOINT_ONTOLOGY = "http://10.33.96.18:7200/repositories/ONTOLOGIA_EXTRACADASTRO"
 # ENDPOINT_RESOURCES = "http://10.33.96.18:7200/repositories/EXTRACADASTRO"
 # ENDPOINT_HISTORY = "http://10.33.96.18:7200/repositories/EXTRACADASTRO"
@@ -55,13 +55,39 @@ USE_N_ARY_RELATIONS = True
 # GRAPHDB_BROWSER_CONFIG = "&config=63b76b9865064cd8a9775e1e2f46ff4d"
 # USE_N_ARY_RELATIONS = False
 
+##VEKG
+ENDPOINT_ONTOLOGY = "http://10.33.96.18:7200/repositories/VEKG"
+ENDPOINT_RESOURCES = "http://10.33.96.18:7200/repositories/VEKG"
+ENDPOINT_HISTORY = "http://10.33.96.18:7200/repositories/VEKG"
+GRAPHDB_BROWSER = "http://10.33.96.18:7200/graphs-visualizations"
+GRAPHDB_BROWSER_CONFIG = "&config=63b76b9865064cd8a9775e1e2f46ff4d"
+USE_N_ARY_RELATIONS = False
+
 sparql_ontology = SPARQLWrapper(ENDPOINT_ONTOLOGY)
 sparql_resources = SPARQLWrapper(ENDPOINT_RESOURCES)
 sparql_history = SPARQLWrapper(ENDPOINT_HISTORY)
 
-list_classes_destaque = ['http://xmlns.com/foaf/0.1/Organization','http://www.sefaz.ma.gov.br/ontology/Estabelecimento','http://www.sefaz.ma.gov.br/ontology/Fornecedor','http://xmlns.com/foaf/0.1/Person','http://www.sefaz.ma.gov.br/ontology/Produto']
 
-# return redirect(url_for('controle_consistencias',mensagem=mensagem))
+list_classes_destaque = []
+query = """
+    prefix owl: <http://www.w3.org/2002/07/owl#>
+    prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    prefix optq: <http://eu.optique.ontology/annotations#>
+    PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+    select ?class where {
+        ?class optq:tem_destaque "true"^^xsd:boolean
+    }
+"""
+sparql_ontology.setQuery(query)
+# print(query)
+sparql_ontology.setReturnFormat(JSON)
+results = sparql_ontology.query().convert()
+propriedades = {}
+for result in results["results"]["bindings"]:
+    list_classes_destaque.append(result['class']['value'])
+
+if len(list_classes_destaque) == 0:
+    list_classes_destaque = ['http://xmlns.com/foaf/0.1/Organization','http://www.sefaz.ma.gov.br/ontology/Estabelecimento','http://www.sefaz.ma.gov.br/ontology/Fornecedor','http://xmlns.com/foaf/0.1/Person','http://www.sefaz.ma.gov.br/ontology/Produto']
 
 app = Flask(__name__)
 
@@ -89,8 +115,14 @@ def classes():
             UNION{
                 ?class a rdfs:Class.
             }
-            OPTIONAL{?class rdfs:label ?l}
-    		OPTIONAL{?class rdfs:comment ?c}
+            OPTIONAL{
+                ?class rdfs:label ?l.
+                FILTER(lang(?l)!='en')
+            }
+    		OPTIONAL{
+                ?class rdfs:comment ?c.
+                FILTER(lang(?c)!='en')
+            }
             BIND(COALESCE(?l,?class) AS ?label)
             FILTER(!CONTAINS(STR(?class),"http://www.w3.org/2000/01/rdf-schema#"))
             FILTER(!CONTAINS(STR(?class),"http://www.w3.org/2001/XMLSchema#"))
@@ -114,6 +146,7 @@ def classes():
                 ?sub rdfs:subClassOf <{result['class']['value']}>.
                 OPTIONAL{{
                     ?sub rdfs:label ?l.
+                    FILTER(lang(?l)!='en')
                 }}
                 BIND(COALESCE(?l,?sub) AS ?label)
             }}
@@ -153,7 +186,10 @@ def propriedades():
             UNION{
                 ?property a rdfs:Property.
             }
-            OPTIONAL{?property rdfs:label ?l}
+            OPTIONAL{
+                ?property rdfs:label ?l
+                FILTER(lang(?l)!='en')
+            }
             BIND(COALESCE(?l,?property) AS ?label)
         }
         ORDER BY ?label  
@@ -188,7 +224,10 @@ def list_resources(page,methods=['GET']):
             prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
             select ?resource ?label where {{ 
                 ?resource a <{classRDF}>.
-                OPTIONAL{{?resource rdfs:label ?l}}
+                OPTIONAL{{
+                    ?resource rdfs:label ?l.
+                    FILTER(lang(?l)!='en')
+                    }}
                 BIND(COALESCE(?l,?resource) AS ?label)
                 {filterSearch}
             }}
@@ -201,7 +240,10 @@ def list_resources(page,methods=['GET']):
             prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
             select ?resource ?label where {{ 
                 ?resource ?p _:x2.
-                OPTIONAL{{?resource rdfs:label ?l}}
+                OPTIONAL{{
+                    ?resource rdfs:label ?l.
+                    FILTER(lang(?l)!='en')
+                    }}
                 BIND(COALESCE(?l,?resource) AS ?label)
                 {filterSearch}
             }}
@@ -334,6 +376,7 @@ def getLabel(methods=['GET']):
             select ?s (GROUP_CONCAT(?label;separator=".\\n") as ?label) where {{ 
                 BIND(<{uri}> as ?s)
                 ?s rdfs:label ?l.
+                FILTER(lang(?l)!='en')
                 BIND(COALESCE(?l,?s) AS ?label)
             }} GROUP BY ?s
         """
