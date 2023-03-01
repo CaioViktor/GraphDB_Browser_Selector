@@ -39,12 +39,12 @@ import urllib.parse
 
 
 #Timeline
-# ENDPOINT_ONTOLOGY = "http://10.33.96.18:7200/repositories/ONTOLOGIA_DOMINIO"
-# ENDPOINT_RESOURCES = "http://10.33.96.18:7200/repositories/Estudo_Timeline"
-# ENDPOINT_HISTORY = "http://10.33.96.18:7200/repositories/Estudo_Timeline"
-# GRAPHDB_BROWSER = "http://10.33.96.18:7200/graphs-visualizations"
-# GRAPHDB_BROWSER_CONFIG = "&config=63b76b9865064cd8a9775e1e2f46ff4d"
-# USE_N_ARY_RELATIONS = True
+ENDPOINT_ONTOLOGY = "http://10.33.96.18:7200/repositories/ONTOLOGIA_DOMINIO"
+ENDPOINT_RESOURCES = "http://10.33.96.18:7200/repositories/Estudo_Timeline"
+ENDPOINT_HISTORY = "http://10.33.96.18:7200/repositories/Estudo_Timeline"
+GRAPHDB_BROWSER = "http://10.33.96.18:7200/graphs-visualizations"
+GRAPHDB_BROWSER_CONFIG = "&config=63b76b9865064cd8a9775e1e2f46ff4d"
+USE_N_ARY_RELATIONS = True
 
 
 # EXTRACAD
@@ -56,12 +56,12 @@ import urllib.parse
 # USE_N_ARY_RELATIONS = False
 
 ##VEKG
-ENDPOINT_ONTOLOGY = "http://10.33.96.18:7200/repositories/VEKG"
-ENDPOINT_RESOURCES = "http://10.33.96.18:7200/repositories/VEKG"
-ENDPOINT_HISTORY = "http://10.33.96.18:7200/repositories/VEKG"
-GRAPHDB_BROWSER = "http://10.33.96.18:7200/graphs-visualizations"
-GRAPHDB_BROWSER_CONFIG = "&config=63b76b9865064cd8a9775e1e2f46ff4d"
-USE_N_ARY_RELATIONS = False
+# ENDPOINT_ONTOLOGY = "http://10.33.96.18:7200/repositories/VEKG"
+# ENDPOINT_RESOURCES = "http://10.33.96.18:7200/repositories/VEKG"
+# ENDPOINT_HISTORY = "http://10.33.96.18:7200/repositories/VEKG"
+# GRAPHDB_BROWSER = "http://10.33.96.18:7200/graphs-visualizations"
+# GRAPHDB_BROWSER_CONFIG = "&config=63b76b9865064cd8a9775e1e2f46ff4d"
+# USE_N_ARY_RELATIONS = False
 
 sparql_ontology = SPARQLWrapper(ENDPOINT_ONTOLOGY)
 sparql_resources = SPARQLWrapper(ENDPOINT_RESOURCES)
@@ -117,7 +117,7 @@ def classes():
             }
             OPTIONAL{
                 ?class rdfs:label ?l.
-                FILTER(lang(?l)!='en')
+            
             }
     		OPTIONAL{
                 ?class rdfs:comment ?c.
@@ -146,7 +146,7 @@ def classes():
                 ?sub rdfs:subClassOf <{result['class']['value']}>.
                 OPTIONAL{{
                     ?sub rdfs:label ?l.
-                    FILTER(lang(?l)!='en')
+                
                 }}
                 BIND(COALESCE(?l,?sub) AS ?label)
             }}
@@ -188,7 +188,7 @@ def propriedades():
             }
             OPTIONAL{
                 ?property rdfs:label ?l
-                FILTER(lang(?l)!='en')
+            
             }
             BIND(COALESCE(?l,?property) AS ?label)
         }
@@ -226,7 +226,7 @@ def list_resources(page,methods=['GET']):
                 ?resource a <{classRDF}>.
                 OPTIONAL{{
                     ?resource rdfs:label ?l.
-                    FILTER(lang(?l)!='en')
+                
                     }}
                 BIND(COALESCE(?l,?resource) AS ?label)
                 {filterSearch}
@@ -242,7 +242,7 @@ def list_resources(page,methods=['GET']):
                 ?resource ?p _:x2.
                 OPTIONAL{{
                     ?resource rdfs:label ?l.
-                    FILTER(lang(?l)!='en')
+                
                     }}
                 BIND(COALESCE(?l,?resource) AS ?label)
                 {filterSearch}
@@ -376,7 +376,7 @@ def getLabel(methods=['GET']):
             select ?s (GROUP_CONCAT(?label;separator=".\\n") as ?label) where {{ 
                 BIND(<{uri}> as ?s)
                 ?s rdfs:label ?l.
-                FILTER(lang(?l)!='en')
+            
                 BIND(COALESCE(?l,?s) AS ?label)
             }} GROUP BY ?s
         """
