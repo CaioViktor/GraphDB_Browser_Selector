@@ -4,64 +4,10 @@ from saved_queries import saved_queries
 from flask import jsonify
 import json
 import urllib.parse
+from config import *
 
 
 
-# ENDPOINT_ONTOLOGY = "http://localhost:7200/repositories/YOUR"#Endpoint for ontology
-# ENDPOINT_RESOURCES = "http://localhost:7200/repositories/YOUR"#Endpoint for resources
-# ENDPOINT_HISTORY = "http://localhost:7200/repositories/YOUR"#Endpoint for history
-# GRAPHDB_BROWSER = "http://localhost:7200/graphs-visualizations"#URL for browser graph-visualization
-# GRAPHDB_BROWSER_CONFIG = '' #set '' if uses default graph-visualization, '&config=ID' for custom graph-visualization config
-# USE_N_ARY_RELATIONS = True #Read n-ary relations as metadata
-
-
-#PROD
-# ENDPOINT_ONTOLOGY = "http://10.33.96.18:7200/repositories/ONTOLOGIA_DOMINIO"
-# ENDPOINT_RESOURCES = "http://10.33.96.18:7200/repositories/GRAFO_SEFAZMA_PRODUCAO"
-# GRAPHDB_BROWSER = "http://10.33.96.18:7200/graphs-visualizations"
-# GRAPHDB_BROWSER_CONFIG = "&config=63b76b9865064cd8a9775e1e2f46ff4d"
-# ENDPOINT_HISTORY = "http://10.33.96.18:7200/repositories/GRAFO_SEFAZMA_PRODUCAO"
-# USE_N_ARY_RELATIONS = False
-
-#LOCAL
-# ENDPOINT_ONTOLOGY = "http://localhost:7200/repositories/ONTOLOGIA_DOMINIO"
-# ENDPOINT_RESOURCES = "http://localhost:7200/repositories/Endereco"
-# ENDPOINT_HISTORY = "http://localhost:7200/repositories/Endereco"
-# GRAPHDB_BROWSER = "http://localhost:7200/graphs-visualizations"
-# GRAPHDB_BROWSER_CONFIG = "&config=ce05fb50c18a4de69d59be186eb6acc5"
-# USE_N_ARY_RELATIONS = True
-# ENDPOINT_ONTOLOGY = "http://localhost:7200/repositories/Test"
-# ENDPOINT_RESOURCES = "http://localhost:7200/repositories/Test"
-# ENDPOINT_HISTORY = "http://localhost:7200/repositories/Test"
-# GRAPHDB_BROWSER = "http://localhost:7200/graphs-visualizations"
-# GRAPHDB_BROWSER_CONFIG = "&config=ce05fb50c18a4de69d59be186eb6acc5"
-# USE_N_ARY_RELATIONS = True
-
-
-#Timeline
-ENDPOINT_ONTOLOGY = "http://10.33.96.18:7200/repositories/ONTOLOGIA_DOMINIO"
-ENDPOINT_RESOURCES = "http://10.33.96.18:7200/repositories/Estudo_Timeline"
-ENDPOINT_HISTORY = "http://10.33.96.18:7200/repositories/Estudo_Timeline"
-GRAPHDB_BROWSER = "http://10.33.96.18:7200/graphs-visualizations"
-GRAPHDB_BROWSER_CONFIG = "&config=63b76b9865064cd8a9775e1e2f46ff4d"
-USE_N_ARY_RELATIONS = True
-
-
-# EXTRACAD
-# ENDPOINT_ONTOLOGY = "http://10.33.96.18:7200/repositories/ONTOLOGIA_EXTRACADASTRO"
-# ENDPOINT_RESOURCES = "http://10.33.96.18:7200/repositories/EXTRACADASTRO"
-# ENDPOINT_HISTORY = "http://10.33.96.18:7200/repositories/EXTRACADASTRO"
-# GRAPHDB_BROWSER = "http://10.33.96.18:7200/graphs-visualizations"
-# GRAPHDB_BROWSER_CONFIG = "&config=63b76b9865064cd8a9775e1e2f46ff4d"
-# USE_N_ARY_RELATIONS = False
-
-##VEKG
-# ENDPOINT_ONTOLOGY = "http://10.33.96.18:7200/repositories/VEKG"
-# ENDPOINT_RESOURCES = "http://10.33.96.18:7200/repositories/VEKG"
-# ENDPOINT_HISTORY = "http://10.33.96.18:7200/repositories/VEKG"
-# GRAPHDB_BROWSER = "http://10.33.96.18:7200/graphs-visualizations"
-# GRAPHDB_BROWSER_CONFIG = "&config=63b76b9865064cd8a9775e1e2f46ff4d"
-# USE_N_ARY_RELATIONS = False
 
 sparql_ontology = SPARQLWrapper(ENDPOINT_ONTOLOGY)
 sparql_resources = SPARQLWrapper(ENDPOINT_RESOURCES)
@@ -227,7 +173,7 @@ def list_resources(page,methods=['GET']):
                 OPTIONAL{{
                     ?resource rdfs:label ?l.
                 
-                    }}
+                }}
                 BIND(COALESCE(?l,?resource) AS ?label)
                 {filterSearch}
             }}
@@ -242,8 +188,7 @@ def list_resources(page,methods=['GET']):
                 ?resource ?p _:x2.
                 OPTIONAL{{
                     ?resource rdfs:label ?l.
-                
-                    }}
+                }}
                 BIND(COALESCE(?l,?resource) AS ?label)
                 {filterSearch}
             }}
@@ -367,6 +312,25 @@ def get_properties(methods=['GET']):
     for classe in json.loads(classes())['classes']:
         classes_list[classe['uri_raw']] = classe['label']
     return jsonify({'properties':properties,'propriedades_list':propriedades_list,'classes_list':classes_list,'graphdb_link':GRAPHDB_BROWSER+"?uri="+urllib.parse.quote(uri)+str(GRAPHDB_BROWSER_CONFIG)+"&embedded"})
+
+@app.route("/get_income_properties")
+def get_income_properties(methods=['GET']):
+    uri = request.args.get('uri',default="")
+    query = f"""
+        SELECT ?s ?p  WHERE{{
+            ?s ?p <{uri}>.    
+        }} ORDER BY ?p		     
+    """  
+    sparql_resources.setQuery(query)
+    # print(query)
+    sparql_resources.setReturnFormat(JSON)
+    results = sparql_resources.query().convert()  
+    properties = {}
+    for result in results["results"]["bindings"]:
+        if not result['p']['value'] in properties:
+            properties[result['p']['value']] = []
+        properties[result['p']['value']].append([result['s']['value'],[]])
+    return jsonify(properties)
 
 @app.route("/get_label")
 def getLabel(methods=['GET']):
@@ -534,7 +498,7 @@ def get_historico():
     }
     """.replace("$uri",uri)
     sparql_history.setQuery(query)
-    # print(query)
+    print(query)
     sparql_history.setReturnFormat(JSON)
     results = sparql_history.query().convert()
     for ins in results["results"]["bindings"]:

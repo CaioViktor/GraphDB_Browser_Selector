@@ -241,6 +241,20 @@ td, th{
 	margin-top:-3px;
 	font-size: 18px;
 }
+.header-propriedades{
+	background-color: #027a42;
+	width: 103%;
+	display: block;
+	color: #ffffff;
+	padding-left: 10px;
+	padding-top: 5px;
+	padding-bottom: 10px;
+	margin-left: -25px;
+	font-size: 15px;
+	text-decoration: none;
+	margin-bottom: 10px;
+	
+}
 .service-item.first-item center{
 	margin-top: 5px;
 }
@@ -467,10 +481,8 @@ td, th{
 #browser b{
 	text-transform: capitalize ;
 }
-#propriedades_destaque{
-	margin: 20px;
-}
-#propriedades_geral{
+
+#propriedades_geral,#propriedades_income,#propriedades_destaque{
 	margin: 20px;
 }
 .buttonHeader{
@@ -509,4 +521,13 @@ td, th{
 #timeline_filter{
 	float: right;
 	margin-right: 10px;
+}
+
+.propriedades details{
+	margin: 0px;
+    moz-border-radius: 0px;
+    -webkit-border-radius: 0px;
+    moz-box-shadow: 0px 0px 0px 0px white;
+    -webkit-box-shadow: 0px 0px 0px 0px white;
+    padding: 0px;
 }

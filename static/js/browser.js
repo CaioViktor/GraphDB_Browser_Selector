@@ -1,6 +1,7 @@
 const propriedadesDestaque = ['http://www.w3.org/2000/01/rdf-schema#label','http://www.w3.org/1999/02/22-rdf-syntax-ns#type','http://www.w3.org/2000/01/rdf-schema#comment','http://dbpedia.org/ontology/thumbnail','http://xmlns.com/foaf/0.1/thumbnail','http://xmlns.com/foaf/0.1/img','http://www.sefaz.ma.gov.br/ontology/tem_timeLine'];
 let propriedades_list = null;
 let classes_list = null;
+let income = null;
 const data = d3.json("/get_properties?uri="+encodeURI(uri)).then(function(dataR){
 	let data = dataR;
 	
@@ -76,23 +77,27 @@ const data = d3.json("/get_properties?uri="+encodeURI(uri)).then(function(dataR)
         if(!(propriedadesDestaque.includes(property))){
             let row = '<div id="'+property+'">';
             if(property in propriedades_list)//Propriedade tem label definida
-                row += '<b title="'+property+'">'+propriedades_list[property]+'</b>';
+                row += '<b title="'+property+'">'+propriedades_list[property]+' ('+dataR['properties'][property].length+') <i class="fa-solid fa-arrow-right"></i></b>';
             else{//Propriedade tem não label definida
                 let label = property.split("/");
                 label = label[label.length-1];
                 label = label.split("#")
                 label = label[label.length-1].replaceAll("_"," ");
-                row += '<b title="'+property+'">'+label+'</b>';
+                row += '<b title="'+property+'">'+label+' ('+dataR['properties'][property].length+') <i class="fa-solid fa-arrow-right"></i></b>';
             }
             row += '<ul>'
+            let count_value = 0;
             dataR['properties'][property].forEach(function(d){
+                if(count_value == 10)
+                    row+="<details><summary>Mais ("+(dataR['properties'][property].length - count_value)+")</summary>";
+                
                 if(d[0].includes('http')){ //Propriedade é uma objectProperty
                     if(['.png','.jpeg','.jpg','.gif','.svg','.ico','.apng','.bmp'].some(typ=>d[0].includes(typ))){//Propriedade é um link para uma imagem
                         row += '<li><a href="'+encodeURI(d[0])+'" target="_blank"><img src="'+d[0]+'" alt="'+d[0]+'" title="'+d[0]+'" class="thumbnail"/></a></li>';
                     }
                     else{//Propriedade é uma objectProperty qualquer
-                        row += '<li><a id="link_'+idx_prop+'" href="/browser?uri='+encodeURI(d[0])+'">'+d[0]+'</a></li>';
-                        const current_idx = idx_prop;
+                        row += '<li><a id="link_'+idx_prop+'_'+count_value+'" href="/browser?uri='+encodeURI(d[0])+'">'+d[0]+'</a></li>';
+                        const current_idx = idx_prop+'_'+count_value;
                         label_object = d3.json("/get_label?uri="+encodeURI(d[0])).then(function(l_obj){
                             if(l_obj['label'].trim().length > 0)
                                 $('#link_'+current_idx).text(l_obj['label']);
@@ -115,15 +120,64 @@ const data = d3.json("/get_properties?uri="+encodeURI(uri)).then(function(dataR)
                     });
                     row += '</ul>'
                 }
-                idx_prop+=1;
+                if(count_value == dataR['properties'][property].length)
+                    row+="</details>";
+                count_value+=1;
             });
             row += '</ul>'
             row += '</div>';
+            idx_prop+=1;
             $('#propriedades_geral').append(row);
         }
     }
 	$("#loading").hide();
+    income = d3.json("/get_income_properties?uri="+encodeURI(uri)).then(function(dataR){
+        let idx_prop = 0;
+        for(property in dataR){//Demais propriedades
+            let row = '<div id="'+property+'">';
+            if(property in propriedades_list)//Propriedade tem label definida
+                row += '<b title="'+property+'"><i class="fa-solid fa-arrow-left"></i> '+propriedades_list[property]+'</b> ('+dataR[property].length+")";
+            else{//Propriedade tem não label definida
+                let label = property.split("/");
+                label = label[label.length-1];
+                label = label.split("#")
+                label = label[label.length-1].replaceAll("_"," ");
+                row += '<b title="'+property+'"><i class="fa-solid fa-arrow-left"></i> '+label+'</b> ('+dataR[property].length+")";
+            }
+            row += '<ul>'
+            let count_value = 1;
+            dataR[property].forEach(function(d){
+                if(count_value == 10)
+                    row+="<details><summary>Mais ("+(dataR[property].length - count_value)+")</summary>";
+                
+                if(d[0].includes('http')){ //Propriedade é uma objectProperty
+                    if(['.png','.jpeg','.jpg','.gif','.svg','.ico','.apng','.bmp'].some(typ=>d[0].includes(typ))){//Propriedade é um link para uma imagem
+                        row += '<li><a href="'+encodeURI(d[0])+'" target="_blank"><img src="'+d[0]+'" alt="'+d[0]+'" title="'+d[0]+'" class="thumbnail"/></a></li>';
+                    }
+                    else{//Propriedade é uma objectProperty qualquer
+                        row += '<li><a id="link_income_'+idx_prop+'_'+count_value+'" href="/browser?uri='+encodeURI(d[0])+'">'+d[0]+'</a></li>';
+                        const current_idx = idx_prop+'_'+count_value;
+                        label_object = d3.json("/get_label?uri="+encodeURI(d[0])).then(function(l_obj){
+                            if(l_obj['label'].trim().length > 0)
+                                $('#link_income_'+current_idx).text(l_obj['label']);
+                        });
+                    }
+                }
+                if(count_value == dataR[property].length)
+                    row+="</details>";
+                count_value+=1;
+            });
+            row += '</ul>'
+            row += '</div>';
+            idx_prop+=1;
+            $('#propriedades_income').append(row);
+    
+        }
+        return dataR;
+    });
 	return data;
 });
+
+
 
 
