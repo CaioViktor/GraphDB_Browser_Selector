@@ -67,7 +67,6 @@ def classes():
             }
     		OPTIONAL{
                 ?class rdfs:comment ?c.
-                FILTER(lang(?c)!='en')
             }
             BIND(COALESCE(?l,?class) AS ?label)
             FILTER(!CONTAINS(STR(?class),"http://www.w3.org/2000/01/rdf-schema#"))
