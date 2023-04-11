@@ -98,10 +98,12 @@ const data = d3.json("/get_properties?uri="+encodeURI(uri)).then(function(dataR)
                     else{//Propriedade é uma objectProperty qualquer
                         row += '<li><a id="link_'+idx_prop+'_'+count_value+'" href="/browser?uri='+encodeURI(d[0])+'">'+d[0]+'</a></li>';
                         const current_idx = idx_prop+'_'+count_value;
-                        label_object = d3.json("/get_label?uri="+encodeURI(d[0])).then(function(l_obj){
-                            if(l_obj['label'].trim().length > 0)
-                                $('#link_'+current_idx).text(l_obj['label']);
-                        });
+                        if(USE_LABELS){
+                            label_object = d3.json("/get_label?uri="+encodeURI(d[0])).then(function(l_obj){
+                                if(l_obj['label'].trim().length > 0)
+                                    $('#link_'+current_idx).text(l_obj['label']);
+                            });
+                        }
                     }
                 }
                 else//Propriedade é uma datatypeProperty
@@ -157,10 +159,12 @@ const data = d3.json("/get_properties?uri="+encodeURI(uri)).then(function(dataR)
                     else{//Propriedade é uma objectProperty qualquer
                         row += '<li><a id="link_income_'+idx_prop+'_'+count_value+'" href="/browser?uri='+encodeURI(d[0])+'">'+d[0]+'</a></li>';
                         const current_idx = idx_prop+'_'+count_value;
-                        label_object = d3.json("/get_label?uri="+encodeURI(d[0])).then(function(l_obj){
-                            if(l_obj['label'].trim().length > 0)
-                                $('#link_income_'+current_idx).text(l_obj['label']);
-                        });
+                        if(USE_LABELS){
+                            label_object = d3.json("/get_label?uri="+encodeURI(d[0])).then(function(l_obj){
+                                if(l_obj['label'].trim().length > 0)
+                                    $('#link_income_'+current_idx).text(l_obj['label']);
+                            });
+                        }
                     }
                 }
                 if(count_value == dataR[property].length)

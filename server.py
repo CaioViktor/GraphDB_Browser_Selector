@@ -160,6 +160,11 @@ def list_resources(page,methods=['GET']):
     search = request.args.get('search',default="")
     classRDF = request.args.get('classRDF',default="")
 
+    label_query = ""
+    if USE_LABELS:
+        label_query = """OPTIONAL{
+                    ?resource rdfs:label ?l.
+                }"""
     filterSearch = ""
     if search != None and search != '':
         filterSearch = f"""FILTER(REGEX(STR(?resource),"{search}","i") || REGEX(STR(?label),"{search}","i"))"""
@@ -169,10 +174,7 @@ def list_resources(page,methods=['GET']):
             prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
             select ?resource ?label where {{ 
                 ?resource a <{classRDF}>.
-                OPTIONAL{{
-                    ?resource rdfs:label ?l.
-                
-                }}
+                {label_query}
                 BIND(COALESCE(?l,?resource) AS ?label)
                 {filterSearch}
             }}
@@ -185,9 +187,7 @@ def list_resources(page,methods=['GET']):
             prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
             select ?resource ?label where {{ 
                 ?resource ?p _:x2.
-                OPTIONAL{{
-                    ?resource rdfs:label ?l.
-                }}
+                {label_query}
                 BIND(COALESCE(?l,?resource) AS ?label)
                 {filterSearch}
             }}
@@ -195,7 +195,7 @@ def list_resources(page,methods=['GET']):
             OFFSET {offset}
         """
     sparql_resources.setQuery(query)
-    # print(query)
+    print(query)
     sparql_resources.setReturnFormat(JSON)
     results = sparql_resources.query().convert()
     resources = []
@@ -241,7 +241,7 @@ def query_saved(id,page):
 @app.route("/browser")
 def browser(methods=['GET']):
     uri = request.args.get('uri',default="")
-    return render_template("browser.html",uri=uri)
+    return render_template("browser.html",uri=uri,USE_LABELS=USE_LABELS)
 
 @app.route("/get_properties")
 def get_properties(methods=['GET']):

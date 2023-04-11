@@ -97,6 +97,11 @@
 </body>
 <script>
     let uri = "{{uri}}";
+    {%if USE_LABELS %}
+        const USE_LABELS = true;
+    {%else%}
+    const USE_LABELS = false;
+    {%endif%}
 </script>
 <script type="text/javascript" src="{{url_for('static',filename='js/browser.js')}}"></script>
 <script type="text/javascript" src="{{url_for('static',filename='js/bootstrap.js')}}"></script>
