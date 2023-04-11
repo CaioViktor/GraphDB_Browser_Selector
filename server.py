@@ -195,7 +195,7 @@ def list_resources(page,methods=['GET']):
             OFFSET {offset}
         """
     sparql_resources.setQuery(query)
-    print(query)
+    # print(query)
     sparql_resources.setReturnFormat(JSON)
     results = sparql_resources.query().convert()
     resources = []
@@ -497,7 +497,7 @@ def get_historico():
     }
     """.replace("$uri",uri)
     sparql_history.setQuery(query)
-    print(query)
+    # print(query)
     sparql_history.setReturnFormat(JSON)
     results = sparql_history.query().convert()
     for ins in results["results"]["bindings"]:

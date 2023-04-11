@@ -86,10 +86,10 @@ details table,details tr,details td,details th{
 }
 
 #logo{
-	width: 200px;
 	height: 80px;
-	margin-right: -95px;
+	width: 270px;
 	margin-top: 7px;
+	margin-bottom: -30px;
 }
 .limpar{
 	background-color: #f84242;
