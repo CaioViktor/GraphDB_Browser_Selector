@@ -1,6 +1,6 @@
 {% from 'macros.html' import menu %}
-{% from 'macros.html' import footer %}
 {% from 'macros.html' import search_bar %}
+{% from 'macros.html' import footer %}
 <!DOCTYPE html>
 <html>
 
@@ -22,10 +22,19 @@
     <script type="text/javascript" src="{{url_for('static',filename='js/jquery-3.5.1.min.js')}}"></script>
     <script type="text/javascript" src="{{url_for('static',filename='js/d3.js')}}"></script>
     <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
+    <script>
+        function expand_sameAs(){
+            {%if not expand_sameas%}
+                window.location.href = window.location.href.replace("&expand_sameas=False","")+"&expand_sameas=True";
+            {%else%}
+                window.location.href = window.location.href.replace("&expand_sameas=True","")+"&expand_sameas=False";
+            {%endif%}
+        }
+    </script>
 
 
     <title>
-        Navegação de Recurso
+        Resource Browser
     </title>
 </head>
 
@@ -44,7 +53,7 @@
                 <div id="nav-bar">
                     <a href="{{url_for('index')}}"><i class="fa-solid fa-circle-nodes"></i>Classes</a> / <a href="{{url_for('browser',uri=uri)}}" id="nav-label"><i class="fa-solid fa-eye"></i> </a>
                 </div>
-                <div id="conteudo">
+                <div id="content">
                     {{search_bar()}}
 
                     <section class="tables" id="browser">
@@ -53,9 +62,10 @@
                                 <div class="col-md-12">
                                     <div class="section-heading">
                                         <div class="header-table">
-                                            <i class="fa-solid fa-eye"></i> <b>Recurso</b>
+                                            <i class="fa-solid fa-eye"></i> <b>Resource</b>
                                             <div id="buttonsHeader">
-                                                <a id="grafoVisual" class="buttonHeader" href="" target="_blank"><i class="fa-solid fa-bezier-curve"></i> Grafo Visual</a>
+                                                <i id="sameAs" class="fa-solid fa-arrows-turn-to-dots" {%if expand_sameas%} title="Disable expansion on owl:sameAs" style="color: #f1e317;" {%else%} title="Enable expansion on owl:sameAs" style="color: #ffffff;" {%endif%} onclick="expand_sameAs();"></i>
+                                                <a id="visualGraph" class="buttonHeader" href="" target="_blank"><i class="fa-solid fa-bezier-curve"></i> Visual Graph</a>
                                                 <a id="timeline" style="display: none;" class="buttonHeader" href="" target="_blank"><i class="fa-solid fa-timeline"></i> Timeline</a>
                                             </div>
                                             
@@ -64,21 +74,21 @@
                                     <img src="{{url_for('static',filename='images/giphy.gif')}}" id="loading"
                                         class="loading" />
                                     <div class="container-fluid">
-                                        <div id="propriedades_destaque">
+                                        <div id="highlight_properties">
 
                                         </div>
-                                        <div id="propriedades_geral" class="propriedades">
+                                        <div id="general_properties" class="properties">
                                             <div class="section-heading">
-                                                <div class="header-propriedades">
-                                                    <i class="fa-solid fa-arrow-right"></i> <b>Propriedades saíndo do recurso</b>
+                                                <div class="header-properties">
+                                                    <i class="fa-solid fa-arrow-right"></i> <b>Propriedades saíndo</b>
                                                 </div>
                                             </div>
 
                                         </div>
-                                        <div id="propriedades_income" class="propriedades">
+                                        <div id="income_properties" class="properties">
                                             <div class="section-heading">
-                                                <div class="header-propriedades">
-                                                    <i class="fa-solid fa-arrow-left"></i> <b>Propriedades chegando ao recurso</b>
+                                                <div class="header-properties">
+                                                    <i class="fa-solid fa-arrow-left"></i> <b>Propriedades entrando</b>
                                                 </div>
                                             </div>
                                         </div>
@@ -97,6 +107,7 @@
 </body>
 <script>
     let uri = "{{uri}}";
+    let expand_sameas = "{{expand_sameas}}";
     {%if USE_LABELS %}
         const USE_LABELS = true;
     {%else%}

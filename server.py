@@ -14,7 +14,7 @@ sparql_resources = SPARQLWrapper(ENDPOINT_RESOURCES)
 sparql_history = SPARQLWrapper(ENDPOINT_HISTORY)
 
 
-list_classes_destaque = []
+list_highlights_classes = []
 query = """
     prefix owl: <http://www.w3.org/2002/07/owl#>
     prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -28,12 +28,11 @@ sparql_ontology.setQuery(query)
 # print(query)
 sparql_ontology.setReturnFormat(JSON)
 results = sparql_ontology.query().convert()
-propriedades = {}
 for result in results["results"]["bindings"]:
-    list_classes_destaque.append(result['class']['value'])
+    list_highlights_classes.append(result['class']['value'])
 
-if len(list_classes_destaque) == 0:
-    list_classes_destaque = ['http://xmlns.com/foaf/0.1/Organization','http://www.sefaz.ma.gov.br/ontology/Estabelecimento','http://www.sefaz.ma.gov.br/ontology/Fornecedor','http://xmlns.com/foaf/0.1/Person','http://www.sefaz.ma.gov.br/ontology/Produto']
+if len(list_highlights_classes) == 0:
+    list_highlights_classes = HIGHLIGHT_CLASSES
 
 app = Flask(__name__)
 
@@ -82,7 +81,7 @@ def classes():
     sparql_ontology.setReturnFormat(JSON)
     results = sparql_ontology.query().convert()
     classes = []
-    classes_destaque = []
+    highlight_classes = []
     for result in results["results"]["bindings"]:
         query = f"""
             prefix owl: <http://www.w3.org/2002/07/owl#>
@@ -112,12 +111,12 @@ def classes():
         if "http" in class_['label']:
             class_['label'] = class_['label'].split("/")[-1].split("#")[-1]
         classes.append(class_)
-        if result['class']['value'] in list_classes_destaque:
-            classes_destaque.append(class_)
-    return json.dumps({'classes':classes,'classes_destaque':classes_destaque}, ensure_ascii=False).encode('utf8')
+        if result['class']['value'] in list_highlights_classes:
+            highlight_classes.append(class_)
+    return json.dumps({'classes':classes,'highlight_classes':highlight_classes}, ensure_ascii=False).encode('utf8')
 
-@app.route("/propriedades")
-def propriedades():
+@app.route("/properties")
+def properties():
     query = """
         prefix owl: <http://www.w3.org/2002/07/owl#>
         prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
@@ -143,15 +142,13 @@ def propriedades():
     # print(query)
     sparql_ontology.setReturnFormat(JSON)
     results = sparql_ontology.query().convert()
-    propriedades = {}
+    properties = {}
     for result in results["results"]["bindings"]:
-            
         label = result['label']['value']
         if "http" in label:
             label = label.split("/")[-1].split("#")[-1]
-        propriedades[result['property']['value']] = label
-
-    return json.dumps({'propriedades':propriedades}, ensure_ascii=False).encode('utf8')
+        properties[result['property']['value']] = label
+    return json.dumps({'properties':properties}, ensure_ascii=False).encode('utf8')
 
 
 @app.route("/list_resources/<page>")
@@ -230,7 +227,8 @@ def query_saved(id,page):
     results = sparql_resources.query().convert()
     resources = []
     for result in results["results"]["bindings"]:
-        query_construct = item['construct_query'].replace("$URI",result[item['uri_var']]['value']) 
+        query_construct = item['construct_query'].replace("$selection_triple",result[item['uri_var']]['value']) 
+        # print(query_construct)
         resource = {'graphdb_url':GRAPHDB_BROWSER+"?query="+urllib.parse.quote(query_construct)+GRAPHDB_BROWSER_CONFIG+"&embedded"}
         for var in result:
             resource[var] = result[var]['value']
@@ -241,24 +239,53 @@ def query_saved(id,page):
 @app.route("/browser")
 def browser(methods=['GET']):
     uri = request.args.get('uri',default="")
-    return render_template("browser.html",uri=uri,USE_LABELS=USE_LABELS)
+    expand_sameas = request.args.get('expand_sameas',default="False")
+    if expand_sameas == "True" :
+        expand_sameas = True
+    else:
+        expand_sameas = False
+    return render_template("browser.html",uri=uri,USE_LABELS=USE_LABELS,expand_sameas=expand_sameas)
 
 @app.route("/get_properties")
 def get_properties(methods=['GET']):
     uri = request.args.get('uri',default="")
+
+    expand_sameas = request.args.get('expand_sameas',default="False")
+    if expand_sameas == "True" :
+        EXPAND_SAMEAS = True
+    else:
+        EXPAND_SAMEAS = False
+
+    selection_triple = f'<{uri}> ?p ?o.'
+    if EXPAND_SAMEAS:
+        selection_triple= f"""
+                {{
+                    <{uri}> ?p ?o .
+                }}
+                UNION{{
+                    {{
+                        <{uri}> owl:sameAs ?same.
+                        ?same ?p ?o.
+                    }}UNION{{
+                        ?same owl:sameAs <{uri}>.
+                        ?same ?p ?o.
+                    }}
+                }}
+                FILTER(?p != owl:sameAs)
+        """
     if not USE_N_ARY_RELATIONS:
         query = f"""
             SELECT ?p ?o WHERE{{
-                <{uri}> ?p ?o.    
+                {selection_triple}   
             }} ORDER BY ?p		     
         """
     else:
         query = f"""
-            PREFIX sfz: <http://www.sefaz.ma.gov.br/ontology/>
+            PREFIX lirb: <https://raw.githubusercontent.com/CaioViktor/LiRB/main/lirb_ontology.ttl/>
             select ?p ?o where {{ 
-                <{uri}> ?p ?o .
+                {selection_triple}   
                 FILTER NOT EXISTS{{
-                    ?o a sfz:N_ary_Relation_Class 
+                    ?o a lirb:N_ary_Relation_Class 
                 }}
             }} ORDER BY ?p	     
         """
@@ -266,21 +293,37 @@ def get_properties(methods=['GET']):
     # print(query)
     sparql_resources.setReturnFormat(JSON)
     results = sparql_resources.query().convert()
-    properties = {}
+    properties_o = {}
     metadatas = {}
     
     for result in results["results"]["bindings"]:
-        if not result['p']['value'] in properties:
-            properties[result['p']['value']] = []
-        properties[result['p']['value']].append([result['o']['value'],[]])
-
+        if not result['p']['value'] in properties_o:
+            properties_o[result['p']['value']] = []
+        properties_o[result['p']['value']].append([result['o']['value'],[]])
+    selection_triple= f"<{uri}> ?p1 ?o_aux ."
+    if EXPAND_SAMEAS:
+        selection_triple = f"""
+                {{
+                    <{uri}> ?p1 ?o_aux .
+                }}
+                UNION{{
+                    {{
+                        <{uri}> owl:sameAs ?same.
+                        ?same ?p1 ?o_aux .
+                    }}UNION{{
+                        ?same owl:sameAs <{uri}>.
+                        ?same ?p1 ?o_aux .
+                    }}
+                }}
+                FILTER(?p != owl:sameAs)
+        """
     if USE_N_ARY_RELATIONS:
         query = f"""
-            PREFIX sfz: <http://www.sefaz.ma.gov.br/ontology/>
+            PREFIX lirb: <https://raw.githubusercontent.com/CaioViktor/LiRB/main/lirb_ontology.ttl/>
             PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
             select ?p1 ?o1 ?p2  ?o2 where {{ 
-                <{uri}> ?p1 ?o_aux .
-                ?o_aux a sfz:N_ary_Relation_Class;
+                {selection_triple}
+                ?o_aux a lirb:N_ary_Relation_Class;
                     rdf:objeto_referenciado ?o1;
                     ?p2 ?o2.
                 FILTER(!CONTAINS(STR(?p2),"http://www.w3.org/2000/01/rdf-schema#"))
@@ -295,8 +338,8 @@ def get_properties(methods=['GET']):
         results = sparql_resources.query().convert()
         
         for result in results["results"]["bindings"]:
-            if not result['p1']['value'] in properties:
-                properties[result['p1']['value']] = []
+            if not result['p1']['value'] in properties_o:
+                properties_o[result['p1']['value']] = []
                 metadatas[result['p1']['value']] = {}
             if not result['o1']['value'] in metadatas[result['p1']['value']]:
                 metadatas[result['p1']['value']][result['o1']['value']] = []
@@ -304,20 +347,44 @@ def get_properties(methods=['GET']):
         
         for property in metadatas:
             for value in metadatas[property]:
-                properties[property].append([value,metadatas[property][value]])
+                properties_o[property].append([value,metadatas[property][value]])
         
-    propriedades_list = json.loads(propriedades())['propriedades']
+    properties_list = json.loads(properties())['properties']
     classes_list = {}
     for classe in json.loads(classes())['classes']:
         classes_list[classe['uri_raw']] = classe['label']
-    return jsonify({'properties':properties,'propriedades_list':propriedades_list,'classes_list':classes_list,'graphdb_link':GRAPHDB_BROWSER+"?uri="+urllib.parse.quote(uri)+str(GRAPHDB_BROWSER_CONFIG)+"&embedded"})
+    return jsonify({'properties':properties_o,'properties_list':properties_list,'classes_list':classes_list,'graphdb_link':GRAPHDB_BROWSER+"?uri="+urllib.parse.quote(uri)+str(GRAPHDB_BROWSER_CONFIG)+"&embedded"})
 
 @app.route("/get_income_properties")
 def get_income_properties(methods=['GET']):
     uri = request.args.get('uri',default="")
+    
+    expand_sameas = request.args.get('expand_sameas',default="False")
+    if expand_sameas == "True" :
+        EXPAND_SAMEAS = True
+    else:
+        EXPAND_SAMEAS = False
+
+    selection_triple = f'?s ?p <{uri}>.'
+    if EXPAND_SAMEAS:
+        selection_triple= f"""
+                {{
+                    ?s ?p <{uri}>.
+                }}
+                UNION{{
+                    {{
+                        <{uri}> owl:sameAs ?same.
+                        ?s ?p ?same.
+                    }}UNION{{
+                        ?same owl:sameAs <{uri}>.
+                        ?s ?p ?same.
+                    }}
+                }}
+                FILTER(?p != owl:sameAs)
+        """
     query = f"""
         SELECT ?s ?p  WHERE{{
-            ?s ?p <{uri}>.    
+            {selection_triple} 
         }} ORDER BY ?p		     
     """  
     sparql_resources.setQuery(query)
@@ -356,50 +423,79 @@ def getLabel(methods=['GET']):
 @app.route("/timeline")
 def timeline(methods=['GET']):
     uri = request.args.get('uri',default="")
-    return render_template("timeline.html",uri=uri)
+    expand_sameas = request.args.get('expand_sameas',default="False")
+    if expand_sameas == "True" :
+        expand_sameas = True
+    else:
+        expand_sameas = False
+    return render_template("timeline.html",uri=uri,expand_sameas=expand_sameas)
 
-@app.route("/get_historico")
-def get_historico():
-    #UPDATE PROPERTY
+@app.route("/get_history")
+def get_history():
     uri = request.args.get('uri',default=None)
+
+    expand_sameas = request.args.get('expand_sameas',default="False")
+    if expand_sameas == "True" :
+        EXPAND_SAMEAS_TIMELINES = True
+    else:
+        EXPAND_SAMEAS_TIMELINES = False
+
+    selection_triple = f'<{uri}> sfz:tem_timeLine ?tl.'
+    if EXPAND_SAMEAS_TIMELINES:
+        selection_triple= f"""
+        {{
+            <{uri}> sfz:tem_timeLine ?tl.
+        }}
+        UNION{{
+            {{
+                <{uri}> owl:sameAs ?same.
+                ?same sfz:tem_timeLine ?tl.
+            }}UNION{{
+                ?same owl:sameAs <{uri}>.
+                ?same sfz:tem_timeLine ?tl.
+            }}
+        }}
+        FILTER(?p != owl:sameAs)
+        """
+    #UPDATE PROPERTY
     query = """
     prefix owl: <http://www.w3.org/2002/07/owl#>
     prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     prefix tl: <http://purl.org/NET/c4dm/timeline.owl#>
     prefix sfz: <http://www.sefaz.ma.gov.br/ontology/>
-    SELECT ?data ?campo  ?va ?vn WHERE {
-    <$uri> sfz:tem_timeLine ?tl.
-    ?inst tl:timeLine ?tl;
-        sfz:tem_atualizacao ?att;
-        tl:atDate ?data.
-    ?att a sfz:Atualiza_Propriedade;
-        sfz:valor_antigo ?va;
-        sfz:valor_novo ?vn;
-        sfz:atributo ?campo.
+    SELECT ?date ?field  ?va ?vn WHERE {
+        $selection_triple
+        ?inst tl:timeLine ?tl;
+            sfz:tem_atualizacao ?att;
+            tl:atDate ?date.
+        ?att a sfz:Atualiza_Propriedade;
+            sfz:valor_antigo ?va;
+            sfz:valor_novo ?vn;
+            sfz:atributo ?field.
     }
-    ORDER BY ?data ?campo 
-    """.replace("$uri",uri)
+    ORDER BY ?date ?field 
+    """.replace("$selection_triple",selection_triple)
     sparql_history.setQuery(query)
     # print(query)
     sparql_history.setReturnFormat(JSON)
     results = sparql_history.query().convert()
-    resources_historico_data = {}
+    resources_history_date = {}
     for result in results["results"]["bindings"]:
-        data = result['data']['value']
-        if not data in resources_historico_data:
-            resources_historico_data[data]= {}
-        if not result['campo']['value'] in resources_historico_data[data]:
-            resources_historico_data[data][result['campo']['value']] = []
-        resources_historico_data[data][result['campo']['value']].append({'valor_antigo': result['va']['value'],'valor_novo': result['vn']['value']})
-    resources_historico_propriedade = {}
+        data = result['date']['value']
+        if not data in resources_history_date:
+            resources_history_date[data]= {}
+        if not result['field']['value'] in resources_history_date[data]:
+            resources_history_date[data][result['field']['value']] = []
+        resources_history_date[data][result['field']['value']].append({'previous_value': result['va']['value'],'new_value': result['vn']['value']})
+    resources_history_property = {}
     for result in results["results"]["bindings"]:
-        data = result['data']['value']
-        propriedade = result['campo']['value']
-        if not propriedade in resources_historico_propriedade:
-            resources_historico_propriedade[propriedade]= {}
-        if not data in resources_historico_propriedade[propriedade]:
-            resources_historico_propriedade[propriedade][data] = []
-        resources_historico_propriedade[propriedade][data].append({'valor_antigo': result['va']['value'],'valor_novo': result['vn']['value']})
+        data = result['date']['value']
+        propriedade = result['field']['value']
+        if not propriedade in resources_history_property:
+            resources_history_property[propriedade]= {}
+        if not data in resources_history_property[propriedade]:
+            resources_history_property[propriedade][data] = []
+        resources_history_property[propriedade][data].append({'previous_value': result['va']['value'],'new_value': result['vn']['value']})
 
     # INSERT RESOURCE
     query = """
@@ -407,52 +503,52 @@ def get_historico():
     prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     prefix tl: <http://purl.org/NET/c4dm/timeline.owl#>
     prefix sfz: <http://www.sefaz.ma.gov.br/ontology/>
-    SELECT DISTINCT ?data WHERE {
-        <$uri> sfz:tem_timeLine ?tl.
+    SELECT DISTINCT ?date WHERE {
+        $selection_triple
         ?inst tl:timeLine ?tl;
             sfz:tem_atualizacao ?att;
-            tl:atDate ?data.
+            tl:atDate ?date.
         ?att a sfz:Insere_Tipo.
     }
-    """.replace("$uri",uri)
+    """.replace("$selection_triple",selection_triple)
     sparql_history.setQuery(query)
     # print(query)
     sparql_history.setReturnFormat(JSON)
     results = sparql_history.query().convert()
     for ins in results["results"]["bindings"]:
-        data = ins['data']['value']
-        if not data in resources_historico_data:
-            resources_historico_data[data] = {}
-        if not 'INS' in resources_historico_data[data]:
-            resources_historico_data[data]['INS'] = []
+        data = ins['date']['value']
+        if not data in resources_history_date:
+            resources_history_date[data] = {}
+        if not 'INS' in resources_history_date[data]:
+            resources_history_date[data]['INS'] = []
 
-    # INSERT PROPERTY
+    # INSERT Relationship
     query = """
     prefix owl: <http://www.w3.org/2002/07/owl#>
     prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     prefix tl: <http://purl.org/NET/c4dm/timeline.owl#>
     prefix sfz: <http://www.sefaz.ma.gov.br/ontology/>
-    SELECT DISTINCT ?data ?prop ?obj WHERE {
-        <$uri> sfz:tem_timeLine ?tl.
+    SELECT DISTINCT ?date ?prop ?obj WHERE {
+        $selection_triple
         ?inst tl:timeLine ?tl;
             sfz:tem_atualizacao ?att;
-            tl:atDate ?data.
+            tl:atDate ?date.
         ?att a sfz:Insere_Relacionamento;
             sfz:uri_objeto_relacionado ?obj;
             sfz:atributo ?prop
     }
-    """.replace("$uri",uri)
+    """.replace("$selection_triple",selection_triple)
     sparql_history.setQuery(query)
     # print(query)
     sparql_history.setReturnFormat(JSON)
     results = sparql_history.query().convert()
     for ins in results["results"]["bindings"]:
-        data = ins['data']['value']
-        if not data in resources_historico_data:
-            resources_historico_data[data] = {}
-        if not 'INS_PROP' in resources_historico_data[data]:
-            resources_historico_data[data]['INS_PROP'] = []
-        resources_historico_data[data]['INS_PROP'].append([ins['prop']['value'],ins['obj']['value']])
+        data = ins['date']['value']
+        if not data in resources_history_date:
+            resources_history_date[data] = {}
+        if not 'INS_PROP' in resources_history_date[data]:
+            resources_history_date[data]['INS_PROP'] = []
+        resources_history_date[data]['INS_PROP'].append([ins['prop']['value'],ins['obj']['value']])
 
 
     # REMOVE RESOURCE
@@ -461,24 +557,24 @@ def get_historico():
     prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     prefix tl: <http://purl.org/NET/c4dm/timeline.owl#>
     prefix sfz: <http://www.sefaz.ma.gov.br/ontology/>
-    SELECT DISTINCT ?data WHERE {
-        <$uri> sfz:tem_timeLine ?tl.
+    SELECT DISTINCT ?date WHERE {
+        $selection_triple
         ?inst tl:timeLine ?tl;
             sfz:tem_atualizacao ?att;
-            tl:atDate ?data.
+            tl:atDate ?date.
         ?att a sfz:Remove_Tipo.
     }
-    """.replace("$uri",uri)
+    """.replace("$selection_triple",selection_triple)
     sparql_history.setQuery(query)
     # print(query)
     sparql_history.setReturnFormat(JSON)
     results = sparql_history.query().convert()
     for dell in results["results"]["bindings"]:
-        data = dell['data']['value']
-        if not data in resources_historico_data:
-            resources_historico_data[data] = {}
-        if not 'DEL' in resources_historico_data[data]:
-            resources_historico_data[data]['DEL'] = []
+        data = dell['date']['value']
+        if not data in resources_history_date:
+            resources_history_date[data] = {}
+        if not 'DEL' in resources_history_date[data]:
+            resources_history_date[data]['DEL'] = []
 
     # REMOVE PROPERTY
     query = """
@@ -486,30 +582,30 @@ def get_historico():
     prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     prefix tl: <http://purl.org/NET/c4dm/timeline.owl#>
     prefix sfz: <http://www.sefaz.ma.gov.br/ontology/>
-    SELECT DISTINCT ?data ?prop ?obj WHERE {
-        <$uri> sfz:tem_timeLine ?tl.
+    SELECT DISTINCT ?date ?prop ?obj WHERE {
+        $selection_triple
         ?inst tl:timeLine ?tl;
             sfz:tem_atualizacao ?att;
-            tl:atDate ?data.
+            tl:atDate ?date.
         ?att a sfz:Remove_Relacionamento;
             sfz:uri_objeto_relacionado ?obj;
             sfz:atributo ?prop
     }
-    """.replace("$uri",uri)
+    """.replace("$selection_triple",selection_triple)
     sparql_history.setQuery(query)
     # print(query)
     sparql_history.setReturnFormat(JSON)
     results = sparql_history.query().convert()
     for ins in results["results"]["bindings"]:
-        data = ins['data']['value']
-        if not data in resources_historico_data:
-            resources_historico_data[data] = {}
-        if not 'REM_PROP' in resources_historico_data[data]:
-            resources_historico_data[data]['REM_PROP'] = []
-        resources_historico_data[data]['REM_PROP'].append([ins['prop']['value'],ins['obj']['value']])
+        date = ins['date']['value']
+        if not date in resources_history_date:
+            resources_history_date[date] = {}
+        if not 'REM_PROP' in resources_history_date[date]:
+            resources_history_date[date]['REM_PROP'] = []
+        resources_history_date[date]['REM_PROP'].append([ins['prop']['value'],ins['obj']['value']])
     
-    resources_historico_data = dict(sorted(resources_historico_data.items()))
-    resources = {'resources_historico_propriedade':resources_historico_propriedade,'resources_historico_data':resources_historico_data}
+    resources_history_date = dict(sorted(resources_history_date.items()))
+    resources = {'resources_history_property':resources_history_property,'resources_history_date':resources_history_date}
     return json.dumps(resources, ensure_ascii=False).encode('utf8')
 
 
