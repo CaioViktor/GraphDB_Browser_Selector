@@ -17,13 +17,13 @@ const data = d3.json("/get_history?uri="+encodeURI(uri)+"&expand_sameas="+expand
         for(property in dataR['resources_history_date'][dataI]){//Loop to get updated properties
             let propertyTitle = processPropertyName(property);
             if(property=="INS"){ //loop to get the insertions of a resource
-                content+='<li><span style="color:green;">**Resource insertion**</span></li>';
+                content+='<li><span style="color:green;">**Inserção de Recurso**</span></li>';
                 count+=1;
             }else if(property=="DEL"){//loop to get the removals of a resource
-                content+='<li><span style="color:red;">**Resource remotion**</span></li>';
+                content+='<li><span style="color:red;">**Remoção de Recurso**</span></li>';
                 count+=1;
             }else if(property=="INS_PROP"){
-                content+='<li><span style="color:green;">**Relationship insertion**</span></li><ul>';
+                content+='<li><span style="color:green;">**Inserção de Relacionamento**</span></li><ul>';
                 dataR['resources_history_date'][dataI][property].forEach(function(att){//loop to get the insertions of a relationship by date
                     let propertyRefTitle = processPropertyName(att[0]);
                     content+='<li><b title="'+att[0]+'">'+propertyRefTitle+'</b>: <span style="color:green;">'+att[1]+'</span></li>';
@@ -31,7 +31,7 @@ const data = d3.json("/get_history?uri="+encodeURI(uri)+"&expand_sameas="+expand
                 });
                 content+='</ul>';
             }else if(property=="REM_PROP"){
-                content+='<li><span style="color:red;">**Relationship remotion**</span></li><ul>';
+                content+='<li><span style="color:red;">**Remoção de Relacionamento**</span></li><ul>';
                 dataR['resources_history_date'][dataI][property].forEach(function(att){//loop to get the removals of a relationship by date
                     let propertyRefTitle = processPropertyName(att[0]);
                     content+='<li><b title="'+att[0]+'">'+propertyRefTitle+'</b>: <span style="color:red;">'+att[1]+'</span></li>';

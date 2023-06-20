@@ -272,12 +272,12 @@ td, th{
 	display:block;
 	white-space: normal;
 	padding: 5px;
+	z-index: 1;
   
 	/* Position the tooltip1 text */
 	position: absolute;
-	z-index: 1;
-	bottom: 10%;
-	left: 50%;
+	top: 5%;
+	left: 50%; 
 	margin-left: -60px;
   
 	/* Fade in tooltip1 */
@@ -404,4 +404,20 @@ td, th{
 	-webkit-box-shadow:1px 1px 1px #8f8686;
 	moz-border-radius: 5px 5px 5px 5px;
 	-webkit-border-radius: 5px 5px 5px 5px;
+}
+
+#footer{
+	color: #778db4;
+	padding-left: 30px;
+	padding-right: 30px;
+	padding-top: 20px;
+	padding-bottom: 10px;
+	background-color: white;
+	moz-box-shadow:2px 2px 5px #000000;
+	-webkit-box-shadow:2px 2px 5px #000000;
+	margin-bottom: 20px;
+}
+
+.copyright{
+	float: right;
 }

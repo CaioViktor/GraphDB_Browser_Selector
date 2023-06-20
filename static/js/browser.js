@@ -1,4 +1,4 @@
-const propriedadesDestaque = ['http://www.w3.org/2000/01/rdf-schema#label','http://www.w3.org/1999/02/22-rdf-syntax-ns#type','http://www.w3.org/2000/01/rdf-schema#comment','http://dbpedia.org/ontology/thumbnail','http://xmlns.com/foaf/0.1/thumbnail','http://xmlns.com/foaf/0.1/img','http://www.arida.ufc.br/ontology/timeline/has_timeLine'];
+const propriedadesDestaque = ['http://www.w3.org/2000/01/rdf-schema#label','http://www.w3.org/1999/02/22-rdf-syntax-ns#type','http://www.w3.org/2000/01/rdf-schema#comment','http://dbpedia.org/ontology/thumbnail','http://xmlns.com/foaf/0.1/thumbnail','http://xmlns.com/foaf/0.1/img','http://www.sefaz.ma.gov.br/ontology/tem_timeLine'];
 let properties_list = null;
 let classes_list = null;
 let income = null;
@@ -11,7 +11,7 @@ const data = d3.json("/get_properties?uri="+encodeURI(uri)+"&expand_sameas="+exp
     
     $("#visualGraph")[0].href=dataR['graphdb_link'];
 
-    if('http://www.arida.ufc.br/ontology/timeline/has_timeLine' in properties){//Resource has timeline
+    if('http://www.sefaz.ma.gov.br/ontology/tem_timeLine' in properties){//Resource has timeline
         $("#timeline")[0].href='timeline?uri='+encodeURI(uri);
         $("#timeline").show();
     }

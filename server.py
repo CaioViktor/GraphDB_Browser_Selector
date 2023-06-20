@@ -53,7 +53,7 @@ def classes():
     query = """
         prefix owl: <http://www.w3.org/2002/07/owl#>
         prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-        select ?class ?label (GROUP_CONCAT(?c;separator=".\\n") as ?comment) where { 
+		select ?class ?label (MAX(?c) as ?comment) where { 
             {
                 ?class a owl:Class.
             }
@@ -62,19 +62,21 @@ def classes():
             }
             OPTIONAL{
                 ?class rdfs:label ?l.
+        		FILTER(lang(?l)="pt")
             
             }
     		OPTIONAL{
-                ?class rdfs:comment ?c.
+                ?class rdfs:comment ?c1.
+        		FILTER(lang(?c1)="pt")
             }
             BIND(COALESCE(?l,?class) AS ?label)
+    		BIND(COALESCE(?c1,"") AS ?c)
             FILTER(!CONTAINS(STR(?class),"http://www.w3.org/2000/01/rdf-schema#"))
             FILTER(!CONTAINS(STR(?class),"http://www.w3.org/2001/XMLSchema#"))
             FILTER(!CONTAINS(STR(?class),"http://www.w3.org/1999/02/22-rdf-syntax-ns#"))
             FILTER(!CONTAINS(STR(?class),"http://www.w3.org/2002/07/owl#"))
         }GROUP BY ?class ?label
-        ORDER BY ?label  
-		     
+        ORDER BY ?label     
     """
     sparql_ontology.setQuery(query)
     # print(query)
@@ -403,7 +405,7 @@ def getLabel(methods=['GET']):
     uri = request.args.get('uri',default="")
     query = f"""
             PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-            select ?s (GROUP_CONCAT(?label;separator=".\\n") as ?label) where {{ 
+            select ?s (MAX(?label) as ?label) where {{ 
                 BIND(<{uri}> as ?s)
                 ?s rdfs:label ?l.
             
