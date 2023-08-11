@@ -27,12 +27,12 @@
 # HIGHLIGHT_CLASSES = ['http://www.example.lirb.com/Person','http://www.example.lirb.com/Company']
 
 # #PROD
-ENDPOINT_ONTOLOGY = "http://10.33.96.18:7200/repositories/ONTOLOGIA_DOMINIO"
-ENDPOINT_RESOURCES = "http://10.33.96.18:7200/repositories/GRAFO_PRODUCAO_MATERIALIZADO"
-GRAPHDB_BROWSER = "http://10.33.96.18:7200/graphs-visualizations"
+ENDPOINT_ONTOLOGY = "http://localhost:7200/repositories/ONTOLOGIA_DOMINIO"
+ENDPOINT_RESOURCES = "http://localhost:7200/repositories/GRAFO_PRODUCAO_MATERIALIZADO"
+GRAPHDB_BROWSER = "http://localhost:7200/graphs-visualizations"
 GRAPHDB_BROWSER_CONFIG = "&config=63b76b9865064cd8a9775e1e2f46ff4d"
-ENDPOINT_HISTORY = "http://10.33.96.18:7200/repositories/GRAFO_PRODUCAO_MATERIALIZADO"
+ENDPOINT_HISTORY = "http://localhost:7200/repositories/GRAFO_PRODUCAO_MATERIALIZADO"
 USE_N_ARY_RELATIONS = False
 USE_LABELS = True #Set True to get labels for resources. When querying virtual repositories maybe be better set to False
-HIGHLIGHT_CLASSES = ['http://xmlns.com/foaf/0.1/Organization','http://www.sefaz.ma.gov.br/ontology/Estabelecimento','http://www.sefaz.ma.gov.br/ontology/Fornecedor','http://xmlns.com/foaf/0.1/Person','http://www.sefaz.ma.gov.br/ontology/Produto'] #A list with URIs of highlighted classes
+HIGHLIGHT_CLASSES = ['http://xmlns.com/foaf/0.1/Organization','http://www.sefaz.ma.gov.br/ontology/Estabelecimento', 'http://xmlns.com/foaf/0.1/Person'] #A list with URIs of highlighted classes
 

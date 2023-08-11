@@ -4,7 +4,7 @@ let classes_list = null;
 let income = null;
 const data = d3.json("/get_properties?uri="+encodeURI(uri)+"&expand_sameas="+expand_sameas).then(function(dataR){
 	let data = dataR;
-	
+    let context = uri.split("resource/")[1].split("/")[0]
     classes_list = dataR['classes_list'];
     properties_list = dataR['properties_list'];
     let properties = dataR['properties'];
@@ -33,6 +33,8 @@ const data = d3.json("/get_properties?uri="+encodeURI(uri)+"&expand_sameas="+exp
     
     if('http://www.w3.org/2000/01/rdf-schema#label' in properties){//Labels
         $(".header-table>b").text(properties['http://www.w3.org/2000/01/rdf-schema#label'][0][0]);
+        $(".header-table>em").text(" - Contexto: " +context);
+        // $("#context").text("Contexto: "+context);
         $("#nav-label").append(properties['http://www.w3.org/2000/01/rdf-schema#label'][0][0]);
         let row = '<div id="label" class="row"><i class="fa-solid fa-tag" title="Nomes"></i>';
         dataR['properties']['http://www.w3.org/2000/01/rdf-schema#label'].forEach(function(d){

@@ -31,8 +31,8 @@ results = sparql_ontology.query().convert()
 for result in results["results"]["bindings"]:
     list_highlights_classes.append(result['class']['value'])
 
-if len(list_highlights_classes) == 0:
-    list_highlights_classes = HIGHLIGHT_CLASSES
+# if len(list_highlights_classes) == 0:
+list_highlights_classes = HIGHLIGHT_CLASSES
 
 app = Flask(__name__)
 

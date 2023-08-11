@@ -360,12 +360,19 @@ td, th{
 	margin-right: 10px;
 }
 #buttonsHeader{
-	position: absolute;
+	/* position: absolute; */
 	right: 0%;
 	top: 0%;
-	margin-top: 5px;
+	margin-top: 0px;
 	
 }
+
+/* #context{
+	background: #009688;
+	border-radius: "4px"!important;
+	height: max-content;
+	color: #fff;
+} */
 
 #uri{
 	margin-left: 40px;

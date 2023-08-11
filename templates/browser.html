@@ -23,12 +23,12 @@
     <script type="text/javascript" src="{{url_for('static',filename='js/d3.js')}}"></script>
     <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
     <script>
-        function expand_sameAs(){
-            {%if not expand_sameas%}
-                window.location.href = window.location.href.replace("&expand_sameas=False","")+"&expand_sameas=True";
+        function expand_sameAs() {
+            {%if not expand_sameas %}
+            window.location.href = window.location.href.replace("&expand_sameas=False", "") + "&expand_sameas=True";
             {%else%}
-                window.location.href = window.location.href.replace("&expand_sameas=True","")+"&expand_sameas=False";
-            {%endif%}
+            window.location.href = window.location.href.replace("&expand_sameas=True", "") + "&expand_sameas=False";
+            {% endif %}
         }
     </script>
 
@@ -51,10 +51,18 @@
                     </div>
                 </header>
                 <div id="nav-bar">
-                    <a href="{{url_for('index')}}"><i class="fa-solid fa-circle-nodes"></i>Classes</a> / <a href="{{url_for('browser',uri=uri)}}" id="nav-label"><i class="fa-solid fa-eye"></i> </a>
+                    <a href="{{url_for('index')}}"><i class="fa-solid fa-circle-nodes"></i>Classes</a> / <a
+                        href="{{url_for('browser',uri=uri)}}" id="nav-label"><i class="fa-solid fa-eye"></i> </a>
                 </div>
                 <div id="content">
                     {{search_bar()}}
+<!-- 
+                    <br/>
+                               
+                    <div id="context">
+                        <i class="fa-solid fa-arrow-left"></i> <b></b>
+                    </div> -->
+                                        
 
                     <section class="tables" id="browser">
                         <div class="container-fluid">
@@ -62,13 +70,21 @@
                                 <div class="col-md-12">
                                     <div class="section-heading">
                                         <div class="header-table">
-                                            <i class="fa-solid fa-eye"></i> <b>Resource</b>
+                                            <i class="fa-solid fa-eye"></i> <b>Resource</b><em></em>
                                             <div id="buttonsHeader">
-                                                <i id="sameAs" class="fa-solid fa-arrows-turn-to-dots" {%if expand_sameas%} title="Disable expansion on owl:sameAs" style="color: #f1e317;" {%else%} title="Enable expansion on owl:sameAs" style="color: #ffffff;" {%endif%} onclick="expand_sameAs();"></i>
-                                                <a id="visualGraph" class="buttonHeader" href="" target="_blank"><i class="fa-solid fa-bezier-curve"></i> Visual Graph</a>
-                                                <a id="timeline" style="display: none;" class="buttonHeader" href="" target="_blank"><i class="fa-solid fa-timeline"></i> Timeline</a>
+                                                
+                                                <i id="sameAs" class="fa-solid fa-arrows-turn-to-dots" {%if
+                                                    expand_sameas%} title="Disable expansion on owl:sameAs"
+                                                    style="color: #f1e317;" {%else%}
+                                                    title="Enable expansion on owl:sameAs" style="color: #ffffff;"
+                                                    {%endif%} onclick="expand_sameAs();"></i>
+                                                <a id="visualGraph" class="buttonHeader" href="" target="_blank"><i
+                                                        class="fa-solid fa-bezier-curve"></i> Visual Graph</a>
+                                                <a id="timeline" style="display: none;" class="buttonHeader" href=""
+                                                    target="_blank"><i class="fa-solid fa-timeline"></i> Timeline</a>
+                                                <a id="menuContext" class="buttonHeader" onclick="alert();"><i>Mudar Contexto</i></a>
                                             </div>
-                                            
+
                                         </div>
                                     </div>
                                     <img src="{{url_for('static',filename='images/giphy.gif')}}" id="loading"
@@ -109,10 +125,10 @@
     let uri = "{{uri}}";
     let expand_sameas = "{{expand_sameas}}";
     {%if USE_LABELS %}
-        const USE_LABELS = true;
+    const USE_LABELS = true;
     {%else%}
     const USE_LABELS = false;
-    {%endif%}
+    {% endif %}
 </script>
 <script type="text/javascript" src="{{url_for('static',filename='js/browser.js')}}"></script>
 <script type="text/javascript" src="{{url_for('static',filename='js/bootstrap.js')}}"></script>
