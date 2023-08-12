@@ -12,15 +12,18 @@
     <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700" rel="stylesheet">
 
     <link rel="stylesheet" type="text/css" href="{{url_for('static',filename='css/bootstrap.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{url_for('static',filename='css/bootstrap.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{url_for('static',filename='css/style.css')}}">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.1.1/css/all.css">
     <link rel="stylesheet" href="//code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css">
     <link rel="stylesheet" type="text/css" href="{{url_for('static',filename='css/templatemo-style.css')}}">
     <link rel="stylesheet" type="text/css" href="{{url_for('static',filename='css/owl.css')}}">
 
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    
     <script type="text/javascript" src="{{url_for('static',filename='js/jquery-3.5.1.min.js')}}"></script>
     <script type="text/javascript" src="{{url_for('static',filename='js/d3.js')}}"></script>
+    <script type="text/javascript" src="{{url_for('static',filename='js/bootstrap.js')}}"></script>
     <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
     <script>
         function expand_sameAs() {
@@ -56,12 +59,43 @@
                 </div>
                 <div id="content">
                     {{search_bar()}}
-<!-- 
-                    <br/>
                                
-                    <div id="context">
-                        <i class="fa-solid fa-arrow-left"></i> <b></b>
-                    </div> -->
+                <!-- Modal -->
+                <div class="modal fade" id="contextsModal" tabindex="-1" role="dialog" aria-labelledby="contextsModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="contextsModalLabel">Contextos do Recurso</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="list-group">
+                                <button id="btn_visao_unificada" title="visão-unificada" class="btn list-group-item list-group-item-action"
+                                    onclick="expand_sameAs();">
+                                    {% if expand_sameas %}
+                                        <i>Desfaz Visão Unificada</i>
+                                    {% else %}
+                                        <i>Visão Unificada</i>
+                                    {% endif %}
+                                </button>
+                                <!-- <i href="#" id="sameAs" class="list-group-item list-group-item-action active" onclick="expand_sameAs();">
+                                  Visão Unificada
+                                </i>
+                                <a href="#" class="list-group-item list-group-item-action">Dapibus ac facilisis in</a>
+                                <a href="#" class="list-group-item list-group-item-action">Morbi leo risus</a>
+                                <a href="#" class="list-group-item list-group-item-action">Porta ac consectetur ac</a>
+                                <a href="#" class="list-group-item list-group-item-action disabled">Vestibulum at eros</a> -->
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <!-- <button type="button" class="btn btn-primary">Confirmar</button> -->
+                        </div>
+                    </div>
+                    </div>
+                </div>
                                         
 
                     <section class="tables" id="browser">
@@ -72,17 +106,16 @@
                                         <div class="header-table">
                                             <i class="fa-solid fa-eye"></i> <b>Resource</b><em></em>
                                             <div id="buttonsHeader">
-                                                
-                                                <i id="sameAs" class="fa-solid fa-arrows-turn-to-dots" {%if
-                                                    expand_sameas%} title="Disable expansion on owl:sameAs"
-                                                    style="color: #f1e317;" {%else%}
-                                                    title="Enable expansion on owl:sameAs" style="color: #ffffff;"
-                                                    {%endif%} onclick="expand_sameAs();"></i>
+                                                    <i id="sameAs" class="fa-solid fa-arrows-turn-to-dots" 
+                                                    {%if expand_sameas%} title="Disable expansion on owl:sameAs" style="color: #f1e317;" 
+                                                    {%else%} title="Enable expansion on owl:sameAs" style="color: #ffffff;"
+                                                    {%endif%} onclick="expand_sameAs();">
+                                                </i>
                                                 <a id="visualGraph" class="buttonHeader" href="" target="_blank"><i
                                                         class="fa-solid fa-bezier-curve"></i> Visual Graph</a>
                                                 <a id="timeline" style="display: none;" class="buttonHeader" href=""
                                                     target="_blank"><i class="fa-solid fa-timeline"></i> Timeline</a>
-                                                <a id="menuContext" class="buttonHeader" onclick="alert();"><i>Mudar Contexto</i></a>
+                                                <a id="menuContext" class="buttonHeader" data-toggle="modal" data-target="#contextsModal"><i>Mudar Contexto</i></a>
                                             </div>
 
                                         </div>
@@ -96,7 +129,7 @@
                                         <div id="general_properties" class="properties">
                                             <div class="section-heading">
                                                 <div class="header-properties">
-                                                    <i class="fa-solid fa-arrow-right"></i> <b>Propriedades saíndo</b>
+                                                    <i class="fa-solid fa-arrow-right"></i> <b>Propriedades saindo</b>
                                                 </div>
                                             </div>
 
@@ -137,5 +170,9 @@
 <script type="text/javascript" src="{{url_for('static',filename='js/transition.js')}}"></script>
 <script type="text/javascript" src="{{url_for('static',filename='js/owl-carousel.js')}}"></script>
 <script type="text/javascript" src="{{url_for('static',filename='js/custom.js')}}"></script>
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
 </html>

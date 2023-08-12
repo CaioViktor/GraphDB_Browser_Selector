@@ -258,8 +258,25 @@ def get_properties(methods=['GET']):
     else:
         EXPAND_SAMEAS = False
 
+    print('EXPAND_SAMEAS', EXPAND_SAMEAS)
     selection_triple = f'<{uri}> ?p ?o.'
     if EXPAND_SAMEAS:
+        # selection_triple= f"""
+        #         {{
+        #             <{uri}> ?p ?o .
+        #         }}
+        #         UNION{{
+        #             {{
+        #                 <{uri}> owl:sameAs ?same.
+        #                 ?same ?p ?o.
+        #             }}
+        #             #UNION{{ OS LINKS ESTÃO MATERIALIZADOS IDA E VOLTA
+        #             #    ?same owl:sameAs <{uri}>.
+        #             #    ?same ?p ?o.
+        #             #}}
+        #         }}
+        #         FILTER(?p != owl:sameAs)
+        # """
         selection_triple= f"""
                 {{
                     <{uri}> ?p ?o .
@@ -267,9 +284,6 @@ def get_properties(methods=['GET']):
                 UNION{{
                     {{
                         <{uri}> owl:sameAs ?same.
-                        ?same ?p ?o.
-                    }}UNION{{
-                        ?same owl:sameAs <{uri}>.
                         ?same ?p ?o.
                     }}
                 }}
@@ -311,9 +325,6 @@ def get_properties(methods=['GET']):
                 UNION{{
                     {{
                         <{uri}> owl:sameAs ?same.
-                        ?same ?p1 ?o_aux .
-                    }}UNION{{
-                        ?same owl:sameAs <{uri}>.
                         ?same ?p1 ?o_aux .
                     }}
                 }}

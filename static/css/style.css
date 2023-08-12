@@ -367,12 +367,9 @@ td, th{
 	
 }
 
-/* #context{
-	background: #009688;
-	border-radius: "4px"!important;
-	height: max-content;
-	color: #fff;
-} */
+.sameAsContext{
+	color: #000;
+}
 
 #uri{
 	margin-left: 40px;

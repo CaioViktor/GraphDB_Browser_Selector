@@ -10,7 +10,6 @@ const data = d3.json("/list_resources/" + page + "?classRDF=" + classRDF + "&sea
 		return 0;
 	})
 	dataR.forEach(function (d) {
-		console.log(`recursos: `, d.uri.split("resource/")[1].split("/")[0])
 		let context = " - " + d.uri.split("resource/")[1].split("/")[0]
 		let row = '<tr>';
 		// row += '<td title="'+d.graphdb_url+'"><li><a target="_blank" href="'+d.graphdb_url+'">'+d.label+"</a></li></td>";
