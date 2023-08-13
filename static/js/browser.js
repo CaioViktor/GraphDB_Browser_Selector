@@ -25,7 +25,7 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
         if ('http://www.w3.org/2002/07/owl#sameAs' == property) {//Resource has sameAs link
             dataR['properties'][property].forEach(function (d) {
                 let itemcontext = getContextFromURI(d[0])
-                itemsOfContext += `<a role="button" title="Contexto Fonte de Dados ${itemcontext}" href="/browser?uri=${d[0]}&expand_sameas="${expand_sameas}" class="btn list-group-item list-group-item-action">${itemcontext}</a>`
+                itemsOfContext += `<a role="button" title="Contexto Fonte de Dados ${itemcontext}" href="/browser?uri=${d[0]}" class="btn list-group-item list-group-item-action">${itemcontext}</a>`
             });
         }
     }
