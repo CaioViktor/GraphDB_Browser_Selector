@@ -72,7 +72,7 @@
                         </div>
                         <div class="modal-body">
                             <div class="list-group">
-                                <button id="btn_visao_unificada" title="visão-unificada" class="btn list-group-item list-group-item-action"
+                                <button id="btn_visao_unificada" title="Contexto Visão Unificada" class="btn list-group-item list-group-item-action"
                                     onclick="expand_sameAs();">
                                     {% if expand_sameas %}
                                         <i>Desfaz Visão Unificada</i>
@@ -80,13 +80,14 @@
                                         <i>Visão Unificada</i>
                                     {% endif %}
                                 </button>
-                                <!-- <i href="#" id="sameAs" class="list-group-item list-group-item-action active" onclick="expand_sameAs();">
-                                  Visão Unificada
-                                </i>
-                                <a href="#" class="list-group-item list-group-item-action">Dapibus ac facilisis in</a>
-                                <a href="#" class="list-group-item list-group-item-action">Morbi leo risus</a>
-                                <a href="#" class="list-group-item list-group-item-action">Porta ac consectetur ac</a>
-                                <a href="#" class="list-group-item list-group-item-action disabled">Vestibulum at eros</a> -->
+                                <!-- <a role="button" id="btn_visao_higienizada" title="Contexto Visão Higienizada" class="btn list-group-item list-group-item-action"
+                                    href="/browser?uri=http://www.sefaz.ma.gov.br/resource/AppEndereco/Estabelecimento" class="btn list-group-item list-group-item-action">
+                                    {% if expand_sameas %}
+                                        <i>Desfaz Visão Higienizada</i>
+                                    {% else %}
+                                        <i>Visão Higienizada</i>
+                                    {% endif %}
+                                </a> -->
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -104,9 +105,9 @@
                                 <div class="col-md-12">
                                     <div class="section-heading">
                                         <div class="header-table">
-                                            <i class="fa-solid fa-eye"></i> <b>Resource</b><em></em>
+                                            <i class="fa-solid fa-eye"></i> <b>Resource</b><em class="emphasi-context"></em>
                                             <div id="buttonsHeader">
-                                                    <i id="sameAs" class="fa-solid fa-arrows-turn-to-dots" 
+                                                <i id="sameAs" class="fa-solid fa-arrows-turn-to-dots" 
                                                     {%if expand_sameas%} title="Disable expansion on owl:sameAs" style="color: #f1e317;" 
                                                     {%else%} title="Enable expansion on owl:sameAs" style="color: #ffffff;"
                                                     {%endif%} onclick="expand_sameAs();">

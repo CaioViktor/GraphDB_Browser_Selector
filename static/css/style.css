@@ -371,6 +371,14 @@ td, th{
 	color: #000;
 }
 
+.emphasi-context{
+	margin-left: 6px;
+	background: #EC5353;
+	border-radius: 8px;
+	padding: 0px 8px 0px 8px;
+	color: white;
+}
+
 #uri{
 	margin-left: 40px;
 	text-decoration: underline;

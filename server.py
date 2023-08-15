@@ -176,6 +176,9 @@ def list_resources(page,methods=['GET']):
                 {label_query}
                 BIND(COALESCE(?l,?resource) AS ?label)
                 {filterSearch}
+                FILTER(!CONTAINS(STR(?resource),"http://www.sefaz.ma.gov.br/resource/AppEndereco/"))
+                FILTER(!CONTAINS(STR(?resource),"http://www.sefaz.ma.gov.br/resource/AppRazaoSocial/"))
+                FILTER(!CONTAINS(STR(?resource),"http://www.sefaz.ma.gov.br/resource/AppNomeFantasia/"))
             }}
             LIMIT 100
             OFFSET {offset}
@@ -189,6 +192,9 @@ def list_resources(page,methods=['GET']):
                 {label_query}
                 BIND(COALESCE(?l,?resource) AS ?label)
                 {filterSearch}
+                FILTER(!CONTAINS(STR(?resource),"www.sefaz.ma.gov.br/resource/AppEndereco/"))
+                FILTER(!CONTAINS(STR(?resource),"http://www.sefaz.ma.gov.br/resource/AppRazaoSocial/"))
+                FILTER(!CONTAINS(STR(?resource),"http://www.sefaz.ma.gov.br/resource/AppNomeFantasia/"))
             }}
             LIMIT 100
             OFFSET {offset}
@@ -258,7 +264,6 @@ def get_properties(methods=['GET']):
     else:
         EXPAND_SAMEAS = False
 
-    print('EXPAND_SAMEAS', EXPAND_SAMEAS)
     selection_triple = f'<{uri}> ?p ?o.'
     if EXPAND_SAMEAS:
         # selection_triple= f"""
@@ -285,6 +290,7 @@ def get_properties(methods=['GET']):
                     {{
                         <{uri}> owl:sameAs ?same.
                         ?same ?p ?o.
+                        FILTER(!CONTAINS(STR(?same),"http://www.sefaz.ma.gov.br/resource/App"))
                     }}
                 }}
                 FILTER(?p != owl:sameAs)
@@ -326,6 +332,7 @@ def get_properties(methods=['GET']):
                     {{
                         <{uri}> owl:sameAs ?same.
                         ?same ?p1 ?o_aux .
+                        FILTER(!CONTAINS(STR(?same),"http://www.sefaz.ma.gov.br/resource/App"))
                     }}
                 }}
                 FILTER(?p != owl:sameAs)

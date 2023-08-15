@@ -7,7 +7,15 @@ function getContextFromURI(uri) {
     return uri.toString().split("resource/")[1].split("/")[0]
 }
 
-console.log(`Unificar as visões exportadas?`, expand_sameas)
+function getIdentifierFromURI(uri) {
+    let x = uri.toString().split("/")
+    let xx = x[x.length - 1].split("#")
+    return xx[xx.length - 1]
+}
+
+APPS_DE_HIGIENIZACAO = ['AppEndereco','AppRazaoSocial','AppNomeFantasia']
+FONTES = ['RFB','REDESIM', 'Cadastro_SEFAZ-MA']
+
 
 const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas=" + expand_sameas).then(function (dataR) {
     let data = dataR;
@@ -19,15 +27,33 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
 
     $("#visualGraph")[0].href = dataR['graphdb_link'];
 
-    // CONTEXTOS
+    /** ADICIONAR OS CONTEXTOS NO MENU */
     let itemsOfContext = `<div class="list-group">`
+    let itemcontext = ""
+    let titleOfContext = 'Fonte'
+    let resourceAppHigienizada = ''
     for (property in dataR['properties']) {//Looping for all properties
         if ('http://www.w3.org/2002/07/owl#sameAs' == property) {//Resource has sameAs link
             dataR['properties'][property].forEach(function (d) {
-                let itemcontext = getContextFromURI(d[0])
-                itemsOfContext += `<a role="button" title="Contexto Fonte de Dados ${itemcontext}" href="/browser?uri=${d[0]}" class="btn list-group-item list-group-item-action">${itemcontext}</a>`
+                itemcontext = getContextFromURI(d[0])
+                if (APPS_DE_HIGIENIZACAO.includes(itemcontext)) {
+                    itemcontext = "Visão Higienizada"
+                    titleOfContext = "Aplicação"
+                    resourceAppHigienizada = "http://www.sefaz.ma.gov.br/resource/AppEndereco/Estabelecimento/" + getIdentifierFromURI(d[0])
+                } else {
+                    itemsOfContext += `<a role="button" title="Contexto ${titleOfContext} ${itemcontext}" href="/browser?uri=${d[0]}" class="btn list-group-item list-group-item-action">${itemcontext}</a>`
+                }
             });
         }
+        else{
+            resourceAppHigienizada = `http://www.sefaz.ma.gov.br/resource/Cadastro_SEFAZ-MA/Estabelecimento/${getIdentifierFromURI(uri)}`
+        }
+    }
+    // SETA O CONTEXTO VISÃO HIGIENIZADA
+    if(FONTES.includes(context)){
+        $('.list-group').append(`<a role="button" title="Contexto ${titleOfContext} ${itemcontext}" href="/browser?uri=${resourceAppHigienizada}" class="btn list-group-item list-group-item-action">${itemcontext}</a>`);
+    }else{
+        $('#btn_visao_unificada').hide() //falta implementar
     }
     itemsOfContext += `</div>`
     $('.modal-body').append(itemsOfContext);
@@ -56,7 +82,7 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
     let countLabels = 0
     if ('http://www.w3.org/2000/01/rdf-schema#label' in properties) {//Labels
         $(".header-table>b").text(properties['http://www.w3.org/2000/01/rdf-schema#label'][0][0]);
-        $(".header-table>em").text(" - Contexto: " + context);
+        $(".header-table>em").text(`contexto: ${APPS_DE_HIGIENIZACAO.includes(context) ? "Visão Higienizada" : context}`);
         $("#nav-label").append(properties['http://www.w3.org/2000/01/rdf-schema#label'][0][0]);
         let row = '<div id="label" class="row"><i class="fa-solid fa-tag" title="Nomes"></i>';
         dataR['properties']['http://www.w3.org/2000/01/rdf-schema#label'].forEach(function (d) {
@@ -68,7 +94,7 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
     }
 
     if (expand_sameas == "True") {
-        $(".header-table>em").text(" - Contexto: Visão Unificada");
+        $(".header-table>em").text("Contexto: Visão Unificada");
     }
 
     if ('http://www.w3.org/2000/01/rdf-schema#comment' in properties) {//Comments
@@ -82,11 +108,13 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
 
     $('#highlight_properties').append('<div id="uri"><p title="URI" ><i class="fa-solid fa-link"></i>' + uri + '</p></div>');//URIss
 
+    let auxLabelOfClasses = []
     if ('http://www.w3.org/1999/02/22-rdf-syntax-ns#type' in properties) {//Types
         let row = '<div id="type">';
         row += '<b title="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">Types</b>';
         row += '<div id="types" class="row">'
         dataR['properties']['http://www.w3.org/1999/02/22-rdf-syntax-ns#type'].forEach(function (d) {
+            
             let label = classes_list[d[0]];
             if (!(d[0] in classes_list)) {
                 label = d[0].split("/");
@@ -94,7 +122,11 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
                 label = label.split("#")
                 label = label[label.length - 1].replaceAll("_", " ");
             }
-            row += '<a title="' + d[0] + '" href="/resources/0/?classRDF=' + encodeURI(d[0]) + '&label=' + classes_list[d[0]] + '" id="' + d[0] + '" class="types">' + label + '</a>';
+
+            if(!auxLabelOfClasses.includes(label)){ /**Evitar a apresentação de classes repetidas principalmente no contexto de Visão Unificada. */
+                row += '<a title="' + d[0] + '" href="/resources/0/?classRDF=' + encodeURI(d[0]) + '&label=' + classes_list[d[0]] + '" id="' + d[0] + '" class="types">' + label + '</a>';
+                auxLabelOfClasses.push(label)
+            }
         });
         row += '</div>';
         row += '</div>';
@@ -116,7 +148,7 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
             row += '<ul>'
             let count_value = 0;
             dataR['properties'][property].forEach(function (d) {
-                
+
                 if (count_value == 10)
                     row += "<details><summary>More (" + (dataR['properties'][property].length - count_value) + ")</summary>";
 
