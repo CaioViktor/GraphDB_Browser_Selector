@@ -29,6 +29,8 @@
 # #PROD
 ENDPOINT_ONTOLOGY = "http://localhost:7200/repositories/ONTOLOGIA_DOMINIO"
 ENDPOINT_RESOURCES = "http://localhost:7200/repositories/GRAFO_PRODUCAO_MATERIALIZADO"
+# ENDPOINT_ONTOLOGY = "http://localhost:7200/repositories/GRAFO_CONCILIACAO"
+# ENDPOINT_RESOURCES = "http://localhost:7200/repositories/GRAFO_CONCILIACAO"
 GRAPHDB_BROWSER = "http://localhost:7200/graphs-visualizations"
 GRAPHDB_BROWSER_CONFIG = "&config=63b76b9865064cd8a9775e1e2f46ff4d"
 ENDPOINT_HISTORY = "http://localhost:7200/repositories/GRAFO_PRODUCAO_MATERIALIZADO"

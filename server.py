@@ -290,7 +290,7 @@ def get_properties(methods=['GET']):
                     {{
                         <{uri}> owl:sameAs ?same.
                         ?same ?p ?o.
-                        FILTER(!CONTAINS(STR(?same),"http://www.sefaz.ma.gov.br/resource/App"))
+                        OPTIONAL {{FILTER(!CONTAINS(STR(?same),"http://www.sefaz.ma.gov.br/resource/App"))}}
                     }}
                 }}
                 FILTER(?p != owl:sameAs)
@@ -332,7 +332,7 @@ def get_properties(methods=['GET']):
                     {{
                         <{uri}> owl:sameAs ?same.
                         ?same ?p1 ?o_aux .
-                        FILTER(!CONTAINS(STR(?same),"http://www.sefaz.ma.gov.br/resource/App"))
+                        OPTIONAL {{FILTER(!CONTAINS(STR(?same),"http://www.sefaz.ma.gov.br/resource/App"))}}
                     }}
                 }}
                 FILTER(?p != owl:sameAs)
