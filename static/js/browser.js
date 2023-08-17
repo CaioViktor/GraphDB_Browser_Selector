@@ -49,7 +49,7 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
             resourceAppHigienizada = `http://www.sefaz.ma.gov.br/resource/Cadastro_SEFAZ-MA/Estabelecimento/${getIdentifierFromURI(uri)}`
         }
     }
-    // SETA O CONTEXTO VISÃO HIGIENIZADA
+    // SETA O CONTEXTO 'VISÃO HIGIENIZADA'
     if(FONTES.includes(context)){
         $('.list-group').append(`<a role="button" title="Contexto ${titleOfContext} ${itemcontext}" href="/browser?uri=${resourceAppHigienizada}" class="btn list-group-item list-group-item-action">${itemcontext}</a>`);
     }else{
@@ -157,7 +157,18 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
                         row += '<li><a href="' + encodeURI(d[0]) + '" target="_blank"><img src="' + d[0] + '" alt="' + d[0] + '" title="' + d[0] + '" class="thumbnail"/></a></li>';
                     }
                     else {//Properties is another objectProperty
-                        row += '<li><a id="link_' + idx_prop + '_' + count_value + '" href="/browser?uri=' + encodeURI(d[0]) + "&expand_sameas=" + expand_sameas + '">' + d[0] + '</a></li>';
+                        row += '<li><a id="link_' + idx_prop + '_' + count_value + '" href="/browser?uri=' + encodeURI(d[0]) + "&expand_sameas=" + expand_sameas + '">' + d[0];
+                        
+
+                        /**Adicionar botão para abrir aplicação de recomendação de endereço */
+                        if(property == "http://www.sefaz.ma.gov.br/ontology/endereco_recomendado"){
+                            const cpf_cnpj = getIdentifierFromURI(d[0])
+                            row += `</a><a class="btn" href="http://10.33.96.18:5000/recomendacao/0?cnpj=${cpf_cnpj}" target="_blank" style="margin-left: 8px";>Abrir Aplicação</button></li>`
+                        }else{
+                            row += `</a></li>`;
+                        }
+
+
                         const current_idx = idx_prop + '_' + count_value;
                         if (USE_LABELS) {
                             label_object = d3.json("/get_label?uri=" + encodeURI(d[0])).then(function (l_obj) {

@@ -470,10 +470,11 @@ def get_history():
             {{
                 <{uri}> owl:sameAs ?same.
                 ?same sfz:tem_timeLine ?tl.
-            }}UNION{{
-                ?same owl:sameAs <{uri}>.
-                ?same sfz:tem_timeLine ?tl.
             }}
+            # UNION{{ Comentei esse trecho porque o grafo de links já tem o caminho inverso
+            #     ?same owl:sameAs <{uri}>.
+            #     ?same sfz:tem_timeLine ?tl.
+            # }}
         }}
         FILTER(?p != owl:sameAs)
         """
@@ -483,7 +484,7 @@ def get_history():
     prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     prefix tl: <http://purl.org/NET/c4dm/timeline.owl#>
     prefix sfz: <http://www.sefaz.ma.gov.br/ontology/>
-    SELECT ?date ?field  ?va ?vn WHERE {
+    SELECT ?inst ?date ?field  ?va ?vn WHERE {
         $selection_triple
         ?inst tl:timeLine ?tl;
             sfz:tem_atualizacao ?att;
@@ -500,12 +501,17 @@ def get_history():
     sparql_history.setReturnFormat(JSON)
     results = sparql_history.query().convert()
     resources_history_date = {}
+    print(results["results"]["bindings"])
     for result in results["results"]["bindings"]:
+        print(result)
+        fonte = result['inst']['value'].split("resource/")[1].split("/")[0]
         data = result['date']['value']
         if not data in resources_history_date:
             resources_history_date[data]= {}
         if not result['field']['value'] in resources_history_date[data]:
             resources_history_date[data][result['field']['value']] = []
+        if not 'FONTE' in resources_history_date[data]:
+            resources_history_date[data]['FONTE'] = [fonte]
         resources_history_date[data][result['field']['value']].append({'previous_value': result['va']['value'],'new_value': result['vn']['value']})
     resources_history_property = {}
     for result in results["results"]["bindings"]:
@@ -523,7 +529,7 @@ def get_history():
     prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     prefix tl: <http://purl.org/NET/c4dm/timeline.owl#>
     prefix sfz: <http://www.sefaz.ma.gov.br/ontology/>
-    SELECT DISTINCT ?date WHERE {
+    SELECT DISTINCT ?inst ?date WHERE {
         $selection_triple
         ?inst tl:timeLine ?tl;
             sfz:tem_atualizacao ?att;
@@ -535,12 +541,16 @@ def get_history():
     # print(query)
     sparql_history.setReturnFormat(JSON)
     results = sparql_history.query().convert()
+    print(results["results"]["bindings"])
     for ins in results["results"]["bindings"]:
+        fonte = ins['inst']['value'].split("resource/")[1].split("/")[0]
         data = ins['date']['value']
         if not data in resources_history_date:
             resources_history_date[data] = {}
         if not 'INS' in resources_history_date[data]:
             resources_history_date[data]['INS'] = []
+        if not 'FONTE' in resources_history_date[data]:
+            resources_history_date[data]['FONTE'] = [fonte]
 
     # INSERT Relationship
     query = """
@@ -548,7 +558,7 @@ def get_history():
     prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     prefix tl: <http://purl.org/NET/c4dm/timeline.owl#>
     prefix sfz: <http://www.sefaz.ma.gov.br/ontology/>
-    SELECT DISTINCT ?date ?prop ?obj WHERE {
+    SELECT DISTINCT ?inst ?date ?prop ?obj WHERE {
         $selection_triple
         ?inst tl:timeLine ?tl;
             sfz:tem_atualizacao ?att;
@@ -563,11 +573,15 @@ def get_history():
     sparql_history.setReturnFormat(JSON)
     results = sparql_history.query().convert()
     for ins in results["results"]["bindings"]:
+        fonte = ins['inst']['value'].split("resource/")[1].split("/")[0]
+        print(fonte)
         data = ins['date']['value']
         if not data in resources_history_date:
             resources_history_date[data] = {}
         if not 'INS_PROP' in resources_history_date[data]:
             resources_history_date[data]['INS_PROP'] = []
+        if not 'FONTE' in resources_history_date[data]:
+            resources_history_date[data]['FONTE'] = [fonte]
         resources_history_date[data]['INS_PROP'].append([ins['prop']['value'],ins['obj']['value']])
 
 
@@ -577,7 +591,7 @@ def get_history():
     prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     prefix tl: <http://purl.org/NET/c4dm/timeline.owl#>
     prefix sfz: <http://www.sefaz.ma.gov.br/ontology/>
-    SELECT DISTINCT ?date WHERE {
+    SELECT DISTINCT ?inst ?date WHERE {
         $selection_triple
         ?inst tl:timeLine ?tl;
             sfz:tem_atualizacao ?att;
@@ -590,11 +604,14 @@ def get_history():
     sparql_history.setReturnFormat(JSON)
     results = sparql_history.query().convert()
     for dell in results["results"]["bindings"]:
+        fonte = dell['inst']['value'].split("resource/")[1].split("/")[0]
         data = dell['date']['value']
         if not data in resources_history_date:
             resources_history_date[data] = {}
         if not 'DEL' in resources_history_date[data]:
             resources_history_date[data]['DEL'] = []
+        if not 'FONTE' in resources_history_date[data]:
+            resources_history_date[data]['FONTE'] = [fonte]
 
     # REMOVE PROPERTY
     query = """
@@ -617,11 +634,14 @@ def get_history():
     sparql_history.setReturnFormat(JSON)
     results = sparql_history.query().convert()
     for ins in results["results"]["bindings"]:
+        fonte = ins['inst']['value'].split("resource/")[1].split("/")[0]
         date = ins['date']['value']
         if not date in resources_history_date:
             resources_history_date[date] = {}
         if not 'REM_PROP' in resources_history_date[date]:
             resources_history_date[date]['REM_PROP'] = []
+        if not 'FONTE' in resources_history_date[data]:
+            resources_history_date[data]['FONTE'] = [fonte]
         resources_history_date[date]['REM_PROP'].append([ins['prop']['value'],ins['obj']['value']])
     
     resources_history_date = dict(sorted(resources_history_date.items()))
