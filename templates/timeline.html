@@ -62,11 +62,14 @@
                                 <div class="col-md-12">
                                     <div class="section-heading">
                                         <div class="header-table">
-                                            <i class="fa-solid fa-timeline"></i> <b>Timeline</b><span id="label_resource"></span>
-                                            <i id="sameAs" class="fa-solid fa-arrows-turn-to-dots" {%if expand_sameas%} title="Disable expansion on owl:sameAs" style="color: #f1e317;" {%else%} title="Enable expansion on owl:sameAs" style="color: #ffffff;" {%endif%} onclick="expand_sameAs();"></i>
-                                            <select id="timeline_filter" onchange="selectTimeline(this);">
-                                            </select>
+                                            <i class="fa-solid fa-timeline"></i> <b>Timeline</b><span id="label_resource"></span><em class="emphasi-context"></em>
+                                            <div id="buttonsHeader">
+                                                <i id="sameAs" class="fa-solid fa-arrows-turn-to-dots" {%if expand_sameas%} title="Disable expansion on owl:sameAs" style="color: #f1e317;" {%else%} title="Enable expansion on owl:sameAs" style="color: #ffffff;" {%endif%} onclick="expand_sameAs();"></i>
+                                                <select id="timeline_filter" onchange="selectTimeline(this);">
+                                                </select>
+                                            </div>
                                         </div>
+                                        
                                     </div>
                                     <img src="{{url_for('static',filename='images/giphy.gif')}}" id="loading" class="loading"/>
                                     <div class="container-fluid">

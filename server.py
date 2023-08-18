@@ -290,7 +290,7 @@ def get_properties(methods=['GET']):
                     {{
                         <{uri}> owl:sameAs ?same.
                         ?same ?p ?o.
-                        OPTIONAL {{FILTER(!CONTAINS(STR(?same),"http://www.sefaz.ma.gov.br/resource/App"))}}
+                        FILTER(!CONTAINS(STR(?same),"http://www.sefaz.ma.gov.br/resource/App"))
                     }}
                 }}
                 FILTER(?p != owl:sameAs)
@@ -332,7 +332,7 @@ def get_properties(methods=['GET']):
                     {{
                         <{uri}> owl:sameAs ?same.
                         ?same ?p1 ?o_aux .
-                        OPTIONAL {{FILTER(!CONTAINS(STR(?same),"http://www.sefaz.ma.gov.br/resource/App"))}}
+                        FILTER(!CONTAINS(STR(?same),"http://www.sefaz.ma.gov.br/resource/App"))
                     }}
                 }}
                 FILTER(?p != owl:sameAs)
@@ -501,9 +501,7 @@ def get_history():
     sparql_history.setReturnFormat(JSON)
     results = sparql_history.query().convert()
     resources_history_date = {}
-    print(results["results"]["bindings"])
     for result in results["results"]["bindings"]:
-        print(result)
         fonte = result['inst']['value'].split("resource/")[1].split("/")[0]
         data = result['date']['value']
         if not data in resources_history_date:
@@ -515,13 +513,16 @@ def get_history():
         resources_history_date[data][result['field']['value']].append({'previous_value': result['va']['value'],'new_value': result['vn']['value']})
     resources_history_property = {}
     for result in results["results"]["bindings"]:
+        fonte = result['inst']['value'].split("resource/")[1].split("/")[0]
         data = result['date']['value']
         propriedade = result['field']['value']
         if not propriedade in resources_history_property:
             resources_history_property[propriedade]= {}
         if not data in resources_history_property[propriedade]:
             resources_history_property[propriedade][data] = []
-        resources_history_property[propriedade][data].append({'previous_value': result['va']['value'],'new_value': result['vn']['value']})
+        # if not 'FONTE' in resources_history_property[propriedade][data]:
+            # resources_history_property[propriedade][data]['FONTE'] = [fonte]
+        resources_history_property[propriedade][data].append({'fonte':fonte,'previous_value': result['va']['value'],'new_value': result['vn']['value']})
 
     # INSERT RESOURCE
     query = """
@@ -541,7 +542,6 @@ def get_history():
     # print(query)
     sparql_history.setReturnFormat(JSON)
     results = sparql_history.query().convert()
-    print(results["results"]["bindings"])
     for ins in results["results"]["bindings"]:
         fonte = ins['inst']['value'].split("resource/")[1].split("/")[0]
         data = ins['date']['value']
@@ -574,7 +574,6 @@ def get_history():
     results = sparql_history.query().convert()
     for ins in results["results"]["bindings"]:
         fonte = ins['inst']['value'].split("resource/")[1].split("/")[0]
-        print(fonte)
         data = ins['date']['value']
         if not data in resources_history_date:
             resources_history_date[data] = {}

@@ -52,15 +52,14 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
     // SETA O CONTEXTO 'VISÃO HIGIENIZADA'
     if(FONTES.includes(context)){
         $('.list-group').append(`<a role="button" title="Contexto ${titleOfContext} ${itemcontext}" href="/browser?uri=${resourceAppHigienizada}" class="btn list-group-item list-group-item-action">${itemcontext}</a>`);
-    }else{
-        $('#btn_visao_unificada').hide() //falta implementar
     }
+   
     itemsOfContext += `</div>`
     $('.modal-body').append(itemsOfContext);
 
 
     if ('http://www.sefaz.ma.gov.br/ontology/tem_timeLine' in properties) {//Resource has timeline
-        $("#timeline")[0].href = 'timeline?uri=' + encodeURI(uri);
+        $("#timeline")[0].href = 'timeline?uri=' + encodeURI(uri) + "&expand_sameas=" + expand_sameas;
         $("#timeline").show();
     }
 
@@ -161,10 +160,21 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
                         
 
                         /**Adicionar botão para abrir aplicação de recomendação de endereço */
-                        if(property == "http://www.sefaz.ma.gov.br/ontology/endereco_recomendado"){
-                            const cpf_cnpj = getIdentifierFromURI(d[0])
-                            row += `</a><a class="btn" href="http://10.33.96.18:5000/recomendacao/0?cnpj=${cpf_cnpj}" target="_blank" style="margin-left: 8px";>Abrir Aplicação</button></li>`
-                        }else{
+                        console.log(`contexto`, context)
+                        // const cpf_cnpj = getIdentifierFromURI(d[0])
+                        const cpf_cnpj = getIdentifierFromURI(uri)
+                        if(property == "http://www.sefaz.ma.gov.br/ontology/endereco_recomendado" || (property == "http://www.sefaz.ma.gov.br/ontology/tem_endereco" & context == "Cadastro_SEFAZ-MA")){
+                            row += `</a><a class="btn btn-sm" href="http://10.33.96.18:5000/recomendacao/0?cnpj=${cpf_cnpj}" target="_blank" style="margin-left: 8px";>Abrir Aplicação</button></li>`
+                        } 
+                        else if(property == "http://www.sefaz.ma.gov.br/ontology/tem_endereco" & context == "EXTRACAD"){
+                            if(cpf_cnpj.length > 11){ /**VERIFICANDO SE É UM CNPJ (PESSOA JÚRÍDICA) */
+                                row += `</a><a class="btn btn-sm" href="http://10.33.96.18:5001/recomendacao/PJ/0?cnpj=${cpf_cnpj}" target="_blank" style="margin-left: 8px";>Abrir Aplicação</button></li>`
+                            }
+                            else{ /**ABRIR A APLICAÇÃO DE RECOMENDAÇÃO PARA PESSOA FÍSICA */
+                                row += `</a><a class="btn btn-sm" href="http://10.33.96.18:5001/recomendacao/PF/0?cnpj=${cpf_cnpj}" target="_blank" style="margin-left: 8px";>Abrir Aplicação</button></li>`
+                            }
+                        } 
+                        else{
                             row += `</a></li>`;
                         }
 

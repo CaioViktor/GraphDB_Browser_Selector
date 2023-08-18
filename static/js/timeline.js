@@ -1,12 +1,21 @@
+function getContextFromURI(uri) {
+    return uri.toString().split("resource/")[1].split("/")[0]
+}
+APPS_DE_HIGIENIZACAO = ['AppEndereco','AppRazaoSocial','AppNomeFantasia']
+FONTES = ['RFB','REDESIM', 'Cadastro_SEFAZ-MA']
+
+
 const label = d3.json("/get_label?uri="+encodeURI(uri)).then(function(dataR){
+    let context = getContextFromURI(uri)
     $("#label_resource")[0].innerHTML=": <b><i>" +dataR.label+"</i></b>";
+    $(".header-table>em").text(`contexto: ${APPS_DE_HIGIENIZACAO.includes(context) ? "Visão Higienizada" : context}`);
     return dataR.label
 });
+
+
 const data = d3.json("/get_history?uri="+encodeURI(uri)+"&expand_sameas="+expand_sameas).then(function(dataR){
 	let data = dataR;
     
-    console.log(`dadosR`, dataR)
-
     let count = 0;
     let content = '<div id="timeline_all" class="timeline">';//Timeline for all properties
     content+='<div class="timeline__wrap">';
@@ -23,7 +32,6 @@ const data = d3.json("/get_history?uri="+encodeURI(uri)+"&expand_sameas="+expand
                 fonte_content+= `<span style="margin-left:4px; font-weight: 300; font-size: 0.8rem"> - ${fonte_atual}</span>`
             }
         }
-        // content+=`style="background-color: ${fonte_atual == "Cadastro_SEFAZ-MA" ? '#ddd' : '#F3F3F3'} !important;">`;
         content+=`style="background-color: ${BACK_COLORS[fonte_atual]} !important;">`;
         content+= '<h2>'+date.toLocaleString('pt-br');
         content += fonte_content;
@@ -71,7 +79,10 @@ const data = d3.json("/get_history?uri="+encodeURI(uri)+"&expand_sameas="+expand
     content+='</div>';
     content+='</div>';
     
-    
+    console.log(`expand_sameas????`, expand_sameas)
+    if (expand_sameas == "True") {
+        $(".header-table>em").text("contexto: Visão Unificada");
+    }
         
     $('#timeline').append(content);
     $('#timeline_filter').append('<option value="timeline_all">All'+' ('+count+')</option>');
@@ -85,8 +96,14 @@ const data = d3.json("/get_history?uri="+encodeURI(uri)+"&expand_sameas="+expand
         for(dataI in dataR['resources_history_property'][property]){//Loop para pegar todas as datas para todas as properties
             let date = new Date(dataI);
             content+='<div class="timeline__item" style="background-color: red !important;">';
-            content+='<div class="timeline__content">';
-            content+= '<h2>'+date.toLocaleString('pt-br')+'</h2><ul>';
+            content+='<div class="timeline__content" ';
+            
+            let fonte_atual = ''
+            fonte_atual = dataR['resources_history_property'][property][dataI][0].fonte;
+            content+=`style="background-color: ${BACK_COLORS[fonte_atual]} !important;">`;
+            content+= '<h2>'+date.toLocaleString('pt-br');
+            content += `<span style="margin-left:4px; font-weight: 300; font-size: 0.8rem"> - ${fonte_atual}</span>`;
+            content+='</h2><ul>';
             dataR['resources_history_property'][property][dataI].forEach(function(att){
                 content+='<li><span style="color:red;">'+att['previous_value']+'</span> <i class="fa-solid fa-arrow-right"></i> <span style="color:green;">'+att['new_value']+'</span></li>';
                 count+=1;
@@ -104,6 +121,11 @@ const data = d3.json("/get_history?uri="+encodeURI(uri)+"&expand_sameas="+expand
     timeline(document.querySelectorAll('.timeline'),{
         forceVerticalMode: 600
     });
+
+    // if (expand_sameas == "True") {
+    //     $(".header-table>em").text("contexto: Visão Unificada");
+    // }
+
 	return data;
 });
 
