@@ -266,22 +266,6 @@ def get_properties(methods=['GET']):
 
     selection_triple = f'<{uri}> ?p ?o.'
     if EXPAND_SAMEAS:
-        # selection_triple= f"""
-        #         {{
-        #             <{uri}> ?p ?o .
-        #         }}
-        #         UNION{{
-        #             {{
-        #                 <{uri}> owl:sameAs ?same.
-        #                 ?same ?p ?o.
-        #             }}
-        #             #UNION{{ OS LINKS ESTÃO MATERIALIZADOS IDA E VOLTA
-        #             #    ?same owl:sameAs <{uri}>.
-        #             #    ?same ?p ?o.
-        #             #}}
-        #         }}
-        #         FILTER(?p != owl:sameAs)
-        # """
         selection_triple= f"""
                 {{
                     <{uri}> ?p ?o .
@@ -293,6 +277,10 @@ def get_properties(methods=['GET']):
                         ?same ?p ?o.
                         FILTER(!CONTAINS(STR(?same),"http://www.sefaz.ma.gov.br/resource/App"))
                     }}
+                    # UNION{{ 
+                    #     ?same owl:sameAs <{uri}>.
+                    #     ?same ?p ?o.
+                    # }}
                 }}
                 FILTER(?p != owl:sameAs)
         """
@@ -331,12 +319,7 @@ def get_properties(methods=['GET']):
             properties_o[result['p']['value']].append([result['o']['value'], [], [result['same']['value']]])
         else:
             properties_o[result['p']['value']].append([result['o']['value'], [], []])
-        # if result['same'] is not None:
-            # if not result['same']['value'] in properties_o[result['p']['value']][1]:
-                # properties_o[result['p']['value']][1] = result['same']['value']
-        # if result['same']['value']:
-        #     properties_o[result['p']['value']].append([result['o']['value'],[result['same']['value']]])
-        # else:
+       
 
     selection_triple= f"<{uri}> ?p1 ?o_aux ."
     if EXPAND_SAMEAS:
@@ -413,10 +396,11 @@ def get_income_properties(methods=['GET']):
                     {{
                         <{uri}> owl:sameAs ?same.
                         ?s ?p ?same.
-                    }}UNION{{
-                        ?same owl:sameAs <{uri}>.
-                        ?s ?p ?same.
                     }}
+                    # UNION{{
+                    #     ?same owl:sameAs <{uri}>.
+                    #     ?s ?p ?same.
+                    # }}
                 }}
                 FILTER(?p != owl:sameAs)
         """

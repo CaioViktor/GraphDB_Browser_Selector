@@ -36,10 +36,13 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
     let titleOfContext = 'Fonte'
     let resourceAppHigienizada = ''
     for (property in dataR['properties']) {//Looping for all properties
-        if ('http://www.w3.org/2002/07/owl#sameAs' == property) {//Resource has sameAs link
+        console.log(`1 prop: `,property)
+        if (property == 'http://www.w3.org/2002/07/owl#sameAs') {//Resource has sameAs link
             dataR['properties'][property].forEach(function (d) {
+                // console.log(`o que tem aqui`, property)
                 itemcontext = getContextFromURI(d[0])
                 if (APPS_DE_HIGIENIZACAO.includes(itemcontext)) {
+                    // console.log(`o que tem aqui 2`, itemcontext)
                     itemcontext = "Visão Higienizada"
                     titleOfContext = "Aplicação"
                     resourceAppHigienizada = "http://www.sefaz.ma.gov.br/resource/AppEndereco/Estabelecimento/" + getIdentifierFromURI(d[0])
@@ -48,9 +51,9 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
                 }
             });
         }
-        else {
-            resourceAppHigienizada = `http://www.sefaz.ma.gov.br/resource/Cadastro_SEFAZ-MA/Estabelecimento/${getIdentifierFromURI(uri)}`
-        }
+        // else {
+        //     resourceAppHigienizada = `http://www.sefaz.ma.gov.br/resource/Cadastro_SEFAZ-MA/Estabelecimento/${getIdentifierFromURI(uri)}`
+        // }
     }
     /** SETA O CONTEXTO 'VISÃO HIGIENIZADA' */
     if (FONTES.includes(context)) {
@@ -155,6 +158,7 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
                 if (count_value == 10)
                     row += "<details><summary>More (" + (dataR['properties'][property].length - count_value) + ")</summary>";
 
+                
                 if (d[0].includes('http')) { //Properties is an objectProperty
                     if (['.png', '.jpeg', '.jpg', '.gif', '.svg', '.ico', '.apng', '.bmp'].some(typ => d[0].includes(typ))) {//Property is a image link
                         row += '<li><a href="' + encodeURI(d[0]) + '" target="_blank"><img src="' + d[0] + '" alt="' + d[0] + '" title="' + d[0] + '" class="thumbnail"/></a></li>';
@@ -192,12 +196,26 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
                 }
                 else {//Properties is a datatypeProperty
                     
-                    row += '<li><p id="link_' + idx_prop + '_' + count_value + '">' + d[0];
-                    if (d[2][0]){ /**ADICIONA O CONTEXTO ÀS PROPRIEDADES DE DADOS */
+                    if(property.includes('data_inicio_atividade')){
+                        let year = d[0].slice(0,4)
+                        let month = d[0].slice(4,6)
+                        let day = d[0].slice(6,8)
+                        let date_pt_br = new Date(year, month, day).toLocaleString('pt-br')
+                        row += '<li><p id="link_' + idx_prop + '_' + count_value + '">' + date_pt_br;
+                    }else{
+                        row += '<li><p id="link_' + idx_prop + '_' + count_value + '">' + d[0];
+                    }
+
+                        
+                    /**O d[2][0] contém o objeto da triplas (?s sameas ?o)*/
+                    if (d[2][0]){ /**ADICIONA O CONTEXTO ÀS PROPRIEDADES DE DADOS (expand_sameas==True) */
                         if(d[2][0].includes('http')) { 
                             datatypePropertyContext = getContextFromURI(d[2][0])
                             row += `<span class="context">${datatypePropertyContext}</span>`;
                         }
+                    }
+                    else{ /**(expand_sameas==False)*/
+                        datatypePropertyContext = getContextFromURI(uri)
                     }
 
                     /**ADICIONA BOTÃO PARA ABRIR A APLICAÇÃO DE NOME FANTASIA */
