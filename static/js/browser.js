@@ -13,21 +13,24 @@ function getIdentifierFromURI(uri) {
     return xx[xx.length - 1]
 }
 
-APPS_DE_HIGIENIZACAO = ['AppEndereco','AppRazaoSocial','AppNomeFantasia']
-FONTES = ['RFB','REDESIM', 'Cadastro_SEFAZ-MA']
+APPS_DE_HIGIENIZACAO = ['AppEndereco', 'AppRazaoSocial', 'AppNomeFantasia']
+FONTES = ['RFB', 'REDESIM', 'Cadastro_SEFAZ-MA']
 
 
 const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas=" + expand_sameas).then(function (dataR) {
     let data = dataR;
     let context = getContextFromURI(uri)
+    let cpf_cnpj = getIdentifierFromURI(uri)
     classes_list = dataR['classes_list'];
     properties_list = dataR['properties_list'];
     let properties = dataR['properties'];
+    const eh_pessoa_juridica = cpf_cnpj > 11
+
 
 
     $("#visualGraph")[0].href = dataR['graphdb_link'];
 
-    /** ADICIONAR OS CONTEXTOS NO MENU */
+    /** ADICIONAR OS CONTEXTOS NO MENU DE CONTEXTOS*/
     let itemsOfContext = `<div class="list-group">`
     let itemcontext = ""
     let titleOfContext = 'Fonte'
@@ -45,15 +48,15 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
                 }
             });
         }
-        else{
+        else {
             resourceAppHigienizada = `http://www.sefaz.ma.gov.br/resource/Cadastro_SEFAZ-MA/Estabelecimento/${getIdentifierFromURI(uri)}`
         }
     }
-    // SETA O CONTEXTO 'VISÃO HIGIENIZADA'
-    if(FONTES.includes(context)){
+    /** SETA O CONTEXTO 'VISÃO HIGIENIZADA' */
+    if (FONTES.includes(context)) {
         $('.list-group').append(`<a role="button" title="Contexto ${titleOfContext} ${itemcontext}" href="/browser?uri=${resourceAppHigienizada}" class="btn list-group-item list-group-item-action">${itemcontext}</a>`);
     }
-   
+
     itemsOfContext += `</div>`
     $('.modal-body').append(itemsOfContext);
 
@@ -113,7 +116,7 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
         row += '<b title="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">Types</b>';
         row += '<div id="types" class="row">'
         dataR['properties']['http://www.w3.org/1999/02/22-rdf-syntax-ns#type'].forEach(function (d) {
-            
+
             let label = classes_list[d[0]];
             if (!(d[0] in classes_list)) {
                 label = d[0].split("/");
@@ -122,7 +125,8 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
                 label = label[label.length - 1].replaceAll("_", " ");
             }
 
-            if(!auxLabelOfClasses.includes(label)){ /**Evitar a apresentação de classes repetidas principalmente no contexto de Visão Unificada. */
+            /**Evitar a apresentação de classes repetidas, principalmente no contexto de Visão Unificada. */
+            if (!auxLabelOfClasses.includes(label)) { 
                 row += '<a title="' + d[0] + '" href="/resources/0/?classRDF=' + encodeURI(d[0]) + '&label=' + classes_list[d[0]] + '" id="' + d[0] + '" class="types">' + label + '</a>';
                 auxLabelOfClasses.push(label)
             }
@@ -147,7 +151,7 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
             row += '<ul>'
             let count_value = 0;
             dataR['properties'][property].forEach(function (d) {
-
+                let datatypePropertyContext = ''
                 if (count_value == 10)
                     row += "<details><summary>More (" + (dataR['properties'][property].length - count_value) + ")</summary>";
 
@@ -157,24 +161,22 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
                     }
                     else {//Properties is another objectProperty
                         row += '<li><a id="link_' + idx_prop + '_' + count_value + '" href="/browser?uri=' + encodeURI(d[0]) + "&expand_sameas=" + expand_sameas + '">' + d[0];
-                        
 
-                        /**Adicionar botão para abrir aplicação de recomendação de endereço */
-                        console.log(`contexto`, context)
-                        // const cpf_cnpj = getIdentifierFromURI(d[0])
-                        const cpf_cnpj = getIdentifierFromURI(uri)
-                        if(property == "http://www.sefaz.ma.gov.br/ontology/endereco_recomendado" || (property == "http://www.sefaz.ma.gov.br/ontology/tem_endereco" & context == "Cadastro_SEFAZ-MA")){
+
+                        /**ADICIONA BOTÃO PARA APLICAÇÃO DE RECOMENDAÇÃO DE ENDEREÇO */
+                        const objectPropertyContext = getContextFromURI(d[0])
+                        if ((property == "http://www.sefaz.ma.gov.br/ontology/tem_endereco" && objectPropertyContext == "Cadastro_SEFAZ-MA")) {
                             row += `</a><a class="btn btn-sm" href="http://10.33.96.18:5000/recomendacao/0?cnpj=${cpf_cnpj}" target="_blank" style="margin-left: 8px";>Abrir Aplicação</button></li>`
-                        } 
-                        else if(property == "http://www.sefaz.ma.gov.br/ontology/tem_endereco" & context == "EXTRACAD"){
-                            if(cpf_cnpj.length > 11){ /**VERIFICANDO SE É UM CNPJ (PESSOA JÚRÍDICA) */
+                        }
+                        else if (property == "http://www.sefaz.ma.gov.br/ontology/tem_endereco" && objectPropertyContext == "EXTRACAD") {
+                            if (eh_pessoa_juridica) { 
                                 row += `</a><a class="btn btn-sm" href="http://10.33.96.18:5001/recomendacao/PJ/0?cnpj=${cpf_cnpj}" target="_blank" style="margin-left: 8px";>Abrir Aplicação</button></li>`
                             }
-                            else{ /**ABRIR A APLICAÇÃO DE RECOMENDAÇÃO PARA PESSOA FÍSICA */
+                            else { /**ABRIR A APLICAÇÃO DE RECOMENDAÇÃO PARA PESSOA FÍSICA */
                                 row += `</a><a class="btn btn-sm" href="http://10.33.96.18:5001/recomendacao/PF/0?cnpj=${cpf_cnpj}" target="_blank" style="margin-left: 8px";>Abrir Aplicação</button></li>`
                             }
-                        } 
-                        else{
+                        }
+                        else {
                             row += `</a></li>`;
                         }
 
@@ -189,17 +191,54 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
                     }
                 }
                 else {//Properties is a datatypeProperty
-                    row += '<li><p id="link_' + idx_prop + '_' + count_value + '">' + d[0] + '</p></li>';
+                    
+                    row += '<li><p id="link_' + idx_prop + '_' + count_value + '">' + d[0];
+                    if (d[2][0]){ /**ADICIONA O CONTEXTO ÀS PROPRIEDADES DE DADOS */
+                        if(d[2][0].includes('http')) { 
+                            datatypePropertyContext = getContextFromURI(d[2][0])
+                            row += `<span class="context">${datatypePropertyContext}</span>`;
+                        }
+                    }
+
+                    /**ADICIONA BOTÃO PARA ABRIR A APLICAÇÃO DE NOME FANTASIA */
+                    if (property == "http://www.sefaz.ma.gov.br/ontology/nome_fantasia" ) {
+                        if(datatypePropertyContext == 'Cadastro_SEFAZ-MA'){
+                            if (eh_pessoa_juridica) { 
+                                row += `<a class="btn btn-sm" href="http://10.33.96.18:5003/nome_pj/SIM_NOME_FANTASIA/0?search=${cpf_cnpj}" target="_blank" style="margin-left: 8px";>Abrir Aplicação</button></a>`
+                            }
+                        } 
+                        else if (datatypePropertyContext == 'EXTRACAD'){
+                            if (!eh_pessoa_juridica) { 
+                                row += `<a class="btn btn-sm" href="http://10.33.96.18:5003/nome_pf/QUALIDADE_NOME_EXTRACAD_PF/0?search=${cpf_cnpj}" target="_blank" style="margin-left: 8px";>Abrir Aplicação</button></a>`
+                            }
+                        }
+                    }
+                    /**ADICIONA BOTÃO PARA ABRIR A APLICAÇÃO DE RAZÃO SOCIAL */
+                    if (property == "http://www.sefaz.ma.gov.br/ontology/razao_social" ) {
+                        if(datatypePropertyContext == 'Cadastro_SEFAZ-MA'){
+                            if (eh_pessoa_juridica) { 
+                                row += `<a class="btn btn-sm" href="http://10.33.96.18:5003/razao_social_pj/SIM_RAZAO_SOCIAL_CADSEFAZ/0?search=${cpf_cnpj}" target="_blank" style="margin-left: 8px";>Abrir Aplicação</button></a>`
+                            }
+                        } 
+                        else if (datatypePropertyContext == 'EXTRACAD'){
+                            if (eh_pessoa_juridica) { 
+                                row += `<a class="btn btn-sm" href="http://10.33.96.18:5003/razao_social_pj/SIM_RAZAO_SOCIAL_EXTRACAD_PJ/0?search=${cpf_cnpj}" target="_blank" style="margin-left: 8px";>Abrir Aplicação</button></a>`
+                            }
+                        }
+                    }
+                    row += `</p></li>`
                 }
                 const current_idx = idx_prop + '_' + count_value;
                 if (USE_LABELS && d[0].includes('http')) {
-                    let sameAsContext = d[0].split("resource/")[1].split("/")[0]
                     label_object = d3.json("/get_label?uri=" + encodeURI(d[0])).then(function (l_obj) {
                         if (l_obj['label'].trim().length > 0)
                             $('#link_' + current_idx).text(l_obj['label']);
-                        $('#link_' + current_idx).append('<span class="sameAsContext"> - ' + sameAsContext + '</span>');
+                        /**ADICIONA O CONTEXTO ÀS PROPRIEDADES DE OBJETO */
+                        const objectPropertyContext = getContextFromURI(d[0])
+                        $('#link_' + current_idx).append(`<span class="context">${objectPropertyContext}</span>`);
                     });
                 }
+               
                 if (d[1].length > 0) {//Property has metadata (lirb:N_ary_Relation_Class)
                     row += '<ul>';
                     d[1].forEach(function (meta) {
@@ -256,11 +295,12 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
                         row += '<li><a id="link_income_' + idx_prop + '_' + count_value + '" href="/browser?uri=' + encodeURI(d[0]) + "&expand_sameas=" + expand_sameas + '">' + d[0] + '</a></li>';
                         const current_idx = idx_prop + '_' + count_value;
                         if (USE_LABELS) {
-                            let sameAsContext = d[0].split("resource/")[1].split("/")[0]
+                            let sameAsIncomeContext = getContextFromURI(d[0])
                             label_object = d3.json("/get_label?uri=" + encodeURI(d[0])).then(function (l_obj) {
                                 if (l_obj['label'].trim().length > 0)
                                     $('#link_income_' + current_idx).text(l_obj['label']);
-                                $('#link_income_' + current_idx).append('<span class="sameAsContext"> - ' + sameAsContext + '</span>');
+                                /**ADICIONA O CONTEXTO DA PROPRIEDADE DE OBJETO ENTRANDO */
+                                $('#link_income_' + current_idx).append(`<span class="context">${sameAsIncomeContext}</span>`);
                             });
                         }
                     }

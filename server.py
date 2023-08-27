@@ -161,7 +161,7 @@ def list_resources(page,methods=['GET']):
 
     label_query = ""
     if USE_LABELS:
-        label_query = """OPTIONAL{
+        label_query = """{
                     ?resource rdfs:label ?l.
                 }"""
     filterSearch = ""
@@ -285,6 +285,7 @@ def get_properties(methods=['GET']):
         selection_triple= f"""
                 {{
                     <{uri}> ?p ?o .
+                    BIND (<{uri}> AS ?same)
                 }}
                 UNION{{
                     {{
@@ -297,14 +298,14 @@ def get_properties(methods=['GET']):
         """
     if not USE_N_ARY_RELATIONS:
         query = f"""
-            SELECT ?p ?o WHERE{{
+            SELECT ?same ?p ?o WHERE{{
                 {selection_triple}   
             }} ORDER BY ?p		     
         """
     else:
         query = f"""
             PREFIX lirb: <https://raw.githubusercontent.com/CaioViktor/LiRB/main/lirb_ontology.ttl/>
-            select ?p ?o where {{ 
+            select ?same ?p ?o where {{ 
                 {selection_triple}   
                 FILTER NOT EXISTS{{
                     ?o a lirb:N_ary_Relation_Class 
@@ -318,15 +319,31 @@ def get_properties(methods=['GET']):
     properties_o = {}
     metadatas = {}
     
+    c = 1
     for result in results["results"]["bindings"]:
+        print(c, end='')
+        c += 1
+        print(result, end='\n\n')
         if not result['p']['value'] in properties_o:
             properties_o[result['p']['value']] = []
-        properties_o[result['p']['value']].append([result['o']['value'],[]])
+        if EXPAND_SAMEAS == True:
+            print(result['same'], end='\n\n')
+            properties_o[result['p']['value']].append([result['o']['value'], [], [result['same']['value']]])
+        else:
+            properties_o[result['p']['value']].append([result['o']['value'], [], []])
+        # if result['same'] is not None:
+            # if not result['same']['value'] in properties_o[result['p']['value']][1]:
+                # properties_o[result['p']['value']][1] = result['same']['value']
+        # if result['same']['value']:
+        #     properties_o[result['p']['value']].append([result['o']['value'],[result['same']['value']]])
+        # else:
+
     selection_triple= f"<{uri}> ?p1 ?o_aux ."
     if EXPAND_SAMEAS:
         selection_triple = f"""
                 {{
                     <{uri}> ?p1 ?o_aux .
+                    BIND (<{uri}> AS ?same)
                 }}
                 UNION{{
                     {{
@@ -367,7 +384,7 @@ def get_properties(methods=['GET']):
         
         for property in metadatas:
             for value in metadatas[property]:
-                properties_o[property].append([value,metadatas[property][value]])
+                properties_o[property].append([value,metadatas[property][value],[]])
         
     properties_list = json.loads(properties())['properties']
     classes_list = {}
@@ -390,6 +407,7 @@ def get_income_properties(methods=['GET']):
         selection_triple= f"""
                 {{
                     ?s ?p <{uri}>.
+                    BIND(<{uri}> AS ?same)
                 }}
                 UNION{{
                     {{
@@ -403,7 +421,7 @@ def get_income_properties(methods=['GET']):
                 FILTER(?p != owl:sameAs)
         """
     query = f"""
-        SELECT ?s ?p  WHERE{{
+        SELECT ?same ?s ?p  WHERE{{
             {selection_triple} 
         }} ORDER BY ?p		     
     """  
@@ -415,7 +433,7 @@ def get_income_properties(methods=['GET']):
     for result in results["results"]["bindings"]:
         if not result['p']['value'] in properties:
             properties[result['p']['value']] = []
-        properties[result['p']['value']].append([result['s']['value'],[]])
+        properties[result['p']['value']].append([result['s']['value'],[],[]])
     return jsonify(properties)
 
 @app.route("/get_label")

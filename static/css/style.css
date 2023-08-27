@@ -367,8 +367,10 @@ td, th{
 	
 }
 
-.sameAsContext{
+.context{
 	color: #000;
+	background: #f2f2f2;
+	margin-left: 8px;
 }
 
 .emphasi-context{
