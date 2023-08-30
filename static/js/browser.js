@@ -19,6 +19,7 @@ FONTES = ['RFB', 'REDESIM', 'Cadastro_SEFAZ-MA']
 
 const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas=" + expand_sameas).then(function (dataR) {
     let data = dataR;
+    console.log(`dataR`, dataR)
     let context = getContextFromURI(uri)
     let cpf_cnpj = getIdentifierFromURI(uri)
     classes_list = dataR['classes_list'];
@@ -36,29 +37,29 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
     let titleOfContext = 'Fonte'
     let resourceAppHigienizada = ''
     for (property in dataR['properties']) {//Looping for all properties
-        console.log(`1 prop: `,property)
         if (property == 'http://www.w3.org/2002/07/owl#sameAs') {//Resource has sameAs link
             dataR['properties'][property].forEach(function (d) {
-                // console.log(`o que tem aqui`, property)
                 itemcontext = getContextFromURI(d[0])
                 if (APPS_DE_HIGIENIZACAO.includes(itemcontext)) {
-                    // console.log(`o que tem aqui 2`, itemcontext)
-                    itemcontext = "Visão Higienizada"
-                    titleOfContext = "Aplicação"
+                    // console.log(`3. É uma`, itemcontext)
+                    // itemcontext = "Visão Higienizada"
+                    // titleOfContext = "Aplicação"
                     resourceAppHigienizada = "http://www.sefaz.ma.gov.br/resource/AppEndereco/Estabelecimento/" + getIdentifierFromURI(d[0])
+                    itemsOfContext += `<a role="button" title="Contexto Visão Higienizada" href="/browser?uri=${resourceAppHigienizada}" class="btn list-group-item list-group-item-action">Visão Higienizada</a>`
                 } else {
                     itemsOfContext += `<a role="button" title="Contexto ${titleOfContext} ${itemcontext}" href="/browser?uri=${d[0]}" class="btn list-group-item list-group-item-action">${itemcontext}</a>`
                 }
             });
         }
-        // else {
-        //     resourceAppHigienizada = `http://www.sefaz.ma.gov.br/resource/Cadastro_SEFAZ-MA/Estabelecimento/${getIdentifierFromURI(uri)}`
-        // }
+        else {
+            resourceAppHigienizada = `http://www.sefaz.ma.gov.br/resource/Cadastro_SEFAZ-MA/Estabelecimento/${getIdentifierFromURI(uri)}`
+        }
     }
     /** SETA O CONTEXTO 'VISÃO HIGIENIZADA' */
-    if (FONTES.includes(context)) {
-        $('.list-group').append(`<a role="button" title="Contexto ${titleOfContext} ${itemcontext}" href="/browser?uri=${resourceAppHigienizada}" class="btn list-group-item list-group-item-action">${itemcontext}</a>`);
-    }
+    // console.log(context, itemcontext)
+    // if (FONTES.includes(context)) {
+    //     $('.list-group').append(`<a role="button" title="Contexto ${titleOfContext} ${itemcontext}" href="/browser?uri=${resourceAppHigienizada}" class="btn list-group-item list-group-item-action">${itemcontext}</a>`);
+    // }
 
     itemsOfContext += `</div>`
     $('.modal-body').append(itemsOfContext);
@@ -200,14 +201,14 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
                         let year = d[0].slice(0,4)
                         let month = d[0].slice(4,6)
                         let day = d[0].slice(6,8)
-                        let date_pt_br = new Date(year, month, day).toLocaleString('pt-br')
+                        let date_pt_br = new Date(Date.UTC(year, month-1, day, 3,0,0)).toLocaleDateString('pt-BR')
                         row += '<li><p id="link_' + idx_prop + '_' + count_value + '">' + date_pt_br;
                     }else{
                         row += '<li><p id="link_' + idx_prop + '_' + count_value + '">' + d[0];
                     }
 
                         
-                    /**O d[2][0] contém o objeto da triplas (?s sameas ?o)*/
+                    /**O d[2][0] contém o objeto da triplas (?s owl:sameAs ?o)*/
                     if (d[2][0]){ /**ADICIONA O CONTEXTO ÀS PROPRIEDADES DE DADOS (expand_sameas==True) */
                         if(d[2][0].includes('http')) { 
                             datatypePropertyContext = getContextFromURI(d[2][0])

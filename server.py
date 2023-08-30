@@ -264,8 +264,31 @@ def get_properties(methods=['GET']):
     else:
         EXPAND_SAMEAS = False
 
-    selection_triple = f'<{uri}> ?p ?o.'
+    select = f"""SELECT distinct ?same ?p ?o WHERE {{"""
+    selection_triple = f"""{{ 
+                <{uri}> ?p ?o. 
+                bind(<{uri}> as ?same).
+            }}
+            UNION
+            {{
+                ?uri owl:sameAs <{uri}>. 
+                ?uri owl:sameAs ?sam.
+                # FILTER(!CONTAINS(STR(?sam),"http://www.sefaz.ma.gov.br/resource/App")).
+                FILTER(!CONTAINS(STR(?sam),"{uri}")).
+                bind(<{uri}> as ?same).
+                bind(owl:sameAs as ?p).
+                bind(?sam as ?o).
+            }}
+            UNION
+            {{
+                ?u owl:sameAs <{uri}>. 
+                bind(<{uri}> as ?same).
+                bind(owl:sameAs as ?p).
+                bind(?u as ?o).
+            }}
+            """
     if EXPAND_SAMEAS:
+        select = f"select ?same ?p ?o where {{"
         selection_triple= f"""
                 {{
                     <{uri}> ?p ?o .
@@ -277,31 +300,31 @@ def get_properties(methods=['GET']):
                         ?same ?p ?o.
                         FILTER(!CONTAINS(STR(?same),"http://www.sefaz.ma.gov.br/resource/App"))
                     }}
-                    # UNION{{ 
-                    #     ?same owl:sameAs <{uri}>.
-                    #     ?same ?p ?o.
-                    # }}
+                    UNION{{ 
+                        ?same owl:sameAs <{uri}>.
+                        ?same ?p ?o.
+                        FILTER(!CONTAINS(STR(?same),"http://www.sefaz.ma.gov.br/resource/App")).
+                    }}
                 }}
                 FILTER(?p != owl:sameAs)
         """
     if not USE_N_ARY_RELATIONS:
-        query = f"""
-            SELECT ?same ?p ?o WHERE{{
-                {selection_triple}   
-            }} ORDER BY ?p		     
-        """
+        query = f"""{select}
+            {selection_triple}
+        }} ORDER BY ?same ?p"""
     else:
         query = f"""
             PREFIX lirb: <https://raw.githubusercontent.com/CaioViktor/LiRB/main/lirb_ontology.ttl/>
-            select ?same ?p ?o where {{ 
+            # select ?same ?p ?o where {{ 
+            {select}
                 {selection_triple}   
                 FILTER NOT EXISTS{{
                     ?o a lirb:N_ary_Relation_Class 
                 }}
-            }} ORDER BY ?p	     
+            }} ORDER BY ?same ?p	     
         """
     sparql_resources.setQuery(query)
-    # print(query)
+    print(query)
     sparql_resources.setReturnFormat(JSON)
     results = sparql_resources.query().convert()
     properties_o = {}
@@ -390,7 +413,7 @@ def get_income_properties(methods=['GET']):
         selection_triple= f"""
                 {{
                     ?s ?p <{uri}>.
-                    BIND(<{uri}> AS ?same)
+                    # BIND(<{uri}> AS ?same)
                 }}
                 UNION{{
                     {{
