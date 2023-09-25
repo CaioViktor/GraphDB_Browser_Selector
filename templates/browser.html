@@ -27,7 +27,7 @@
     <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.js"></script>
     <script>
         function expand_sameAs() {
-            {%if not expand_sameas %}
+            {%if not expand_sameas %} 
             window.location.href = window.location.href.replace("&expand_sameas=False", "") + "&expand_sameas=True";
             {%else%}
             window.location.href = window.location.href.replace("&expand_sameas=True", "") + "&expand_sameas=False";
@@ -37,7 +37,7 @@
 
 
     <title>
-        Resource Browser
+        Resource Browser :
     </title>
 </head>
 
@@ -75,9 +75,9 @@
                                 <button id="btn_visao_unificada" title="Contexto Visão Unificada" class="btn list-group-item list-group-item-action"
                                     onclick="expand_sameAs();">
                                     {% if expand_sameas %}
-                                        <i>Desfaz Visão Unificada</i>
+                                        <i>Desfaz Visão </i><b>Unificada</b>
                                     {% else %}
-                                        <i>Visão Unificada</i>
+                                        <i>Visão </i><b>Unificada</b>
                                     {% endif %}
                                 </button>
                                 <!-- <a role="button" id="btn_visao_higienizada" title="Contexto Visão Higienizada" class="btn list-group-item list-group-item-action"

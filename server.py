@@ -257,8 +257,11 @@ def browser(methods=['GET']):
 @app.route("/get_properties")
 def get_properties(methods=['GET']):
     uri = request.args.get('uri',default="")
+    print('<>')
+    print('<uri>',uri)
 
     expand_sameas = request.args.get('expand_sameas',default="False")
+    print('<expand_sameas>',expand_sameas)
     if expand_sameas == "True" :
         EXPAND_SAMEAS = True
     else:
@@ -266,14 +269,13 @@ def get_properties(methods=['GET']):
 
     select = f"""SELECT distinct ?same ?p ?o WHERE {{"""
     selection_triple = f"""{{ 
-                <{uri}> ?p ?o. 
+                <{uri}> ?p ?o. # Quando é a 2ª fonte, não tem owl:sameAs
                 bind(<{uri}> as ?same).
             }}
             UNION
             {{
                 ?uri owl:sameAs <{uri}>. 
                 ?uri owl:sameAs ?sam.
-                # FILTER(!CONTAINS(STR(?sam),"http://www.sefaz.ma.gov.br/resource/App")).
                 FILTER(!CONTAINS(STR(?sam),"{uri}")).
                 bind(<{uri}> as ?same).
                 bind(owl:sameAs as ?p).
@@ -289,25 +291,54 @@ def get_properties(methods=['GET']):
             """
     if EXPAND_SAMEAS:
         select = f"select ?same ?p ?o where {{"
-        selection_triple= f"""
+        if MAIN_DATA_SOURCE in uri:
+            selection_triple = f"""
                 {{
-                    <{uri}> ?p ?o .
-                    BIND (<{uri}> AS ?same)
+                    <{uri}> ?p ?o. 
+                    bind(<{uri}> as ?same).
+                    FILTER(!CONTAINS(STR(?o),"http://www.sefaz.ma.gov.br/resource/App")).
                 }}
-                UNION{{
+                UNION {{
+                    <{uri}> owl:sameAs ?sam .
+                    ?sam ?p ?o.
+                    FILTER(!CONTAINS(STR(?sam),"http://www.sefaz.ma.gov.br/resource/App")).
+                    FILTER(!CONTAINS(STR(?sam),"{uri}")).
+                    bind(?sam as ?same)
+                }}
+                UNION {{
+                    BIND(<{uri}> AS ?same)
+                    BIND(owl:sameAs as ?p)
+                    BIND(<{uri}> AS ?o)
+                }}
+            """
+        else:
+            selection_triple= f"""
                     {{
-                        <{uri}> owl:sameAs ?same.
-                        ?same ?p ?o.
-                        FILTER(!CONTAINS(STR(?same),"http://www.sefaz.ma.gov.br/resource/App"))
-                    }}
-                    UNION{{ 
-                        ?same owl:sameAs <{uri}>.
-                        ?same ?p ?o.
+                        <{uri}> ?p ?o .
+                        BIND (<{uri}> AS ?same)
+                        # Quando vai para a VU estando na VH
                         FILTER(!CONTAINS(STR(?same),"http://www.sefaz.ma.gov.br/resource/App")).
                     }}
-                }}
-                FILTER(?p != owl:sameAs)
-        """
+                    UNION {{
+                        ?same owl:sameAs <{uri}> .
+                        ?same ?p ?o.
+                        FILTER(!CONTAINS(STR(?o),"http://www.sefaz.ma.gov.br/resource/App")).
+                    }}
+                    UNION {{
+                        ?uri owl:sameAs <{uri}> .
+                        ?uri owl:sameAs ?sam .
+                        ?sam ?p ?o.
+                        FILTER(!CONTAINS(STR(?sam),"http://www.sefaz.ma.gov.br/resource/App")).
+                        FILTER(!CONTAINS(STR(?sam),"{uri}")).
+                        bind(?sam as ?same)
+                    }}
+                    UNION {{
+                        ?same owl:sameAs <{uri}> .
+                        BIND(owl:sameAs as ?p)
+                        BIND(?same AS ?o)
+                    }}
+                    # FILTER(?p != owl:sameAs)
+            """
     if not USE_N_ARY_RELATIONS:
         query = f"""{select}
             {selection_triple}
@@ -324,7 +355,7 @@ def get_properties(methods=['GET']):
             }} ORDER BY ?same ?p	     
         """
     sparql_resources.setQuery(query)
-    print(query)
+    # print(query)
     sparql_resources.setReturnFormat(JSON)
     results = sparql_resources.query().convert()
     properties_o = {}
@@ -332,16 +363,23 @@ def get_properties(methods=['GET']):
     
     c = 1
     for result in results["results"]["bindings"]:
-        print(c, end='')
+        print(c, end='. ')
         c += 1
         print(result, end='\n\n')
         if not result['p']['value'] in properties_o:
             properties_o[result['p']['value']] = []
         if EXPAND_SAMEAS == True:
-            print(result['same'], end='\n\n')
-            properties_o[result['p']['value']].append([result['o']['value'], [], [result['same']['value']]])
+            if 'datatype' in result['o']:
+                properties_o[result['p']['value']].append([result['o']['value'], [], [result['same']['value']], result['o']['datatype']])
+            else:
+                properties_o[result['p']['value']].append([result['o']['value'], [], [result['same']['value'],[]]])
         else:
-            properties_o[result['p']['value']].append([result['o']['value'], [], []])
+            print(result['o'], end='\n\n')
+            if 'datatype' in result['o']:
+                properties_o[result['p']['value']].append([result['o']['value'], [], [result['same']['value']], result['o']['datatype']])
+            else:
+                properties_o[result['p']['value']].append([result['o']['value'], [], [],[]])
+        
        
 
     selection_triple= f"<{uri}> ?p1 ?o_aux ."

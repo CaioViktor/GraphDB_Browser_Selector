@@ -37,4 +37,4 @@ ENDPOINT_HISTORY = "http://localhost:7200/repositories/GRAFO_PRODUCAO_MATERIALIZ
 USE_N_ARY_RELATIONS = False
 USE_LABELS = True #Set True to get labels for resources. When querying virtual repositories maybe be better set to False
 HIGHLIGHT_CLASSES = ['http://xmlns.com/foaf/0.1/Organization','http://www.sefaz.ma.gov.br/ontology/Estabelecimento', 'http://xmlns.com/foaf/0.1/Person', 'http://www.sefaz.ma.gov.br/ontology/Sociedade'] #A list with URIs of highlighted classes
-
+MAIN_DATA_SOURCE = "Cadastro_SEFAZ-MA"
