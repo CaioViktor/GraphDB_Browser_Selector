@@ -5,6 +5,11 @@ let income = null;
 
 APPS_DE_HIGIENIZACAO = ['AppEndereco', 'AppRazaoSocial', 'AppNomeFantasia', 'AppSociedade'];
 FONTES = ['RFB', 'REDESIM', 'Cadastro_SEFAZ-MA'];
+CSS_PARA_STATUS_DA_SOCIEDADE = {
+    'DIVERGENTE':'status-sociedade-divergente',
+    'DIVERGENCIA NOS NOMES DE SOCIO':'status-sociedade-divergente',
+    'NAO DIVERGENTE':'status-sociedade-nao-divergente',
+}
 
 function getContextFromURI(uri) {
     return uri.toString().split("resource/")[1].split("/")[0]
@@ -16,7 +21,7 @@ function getIdentifierFromURI(uri) {
     return xx[xx.length - 1]
 }
 
-function exibeContextoQuandoVisãoHigienizada(contexto)  {
+function exibeContextoQuandoVisãoHigienizada(contexto) {
     return APPS_DE_HIGIENIZACAO.includes(contexto) ? true : false
 }
 
@@ -49,7 +54,7 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
                 if (APPS_DE_HIGIENIZACAO.includes(itemcontext)) {
                     if (itemcontext == "AppSociedade") {
                         resourceAppHigienizada = "http://www.sefaz.ma.gov.br/resource/AppSociedade/Empresa/" + getIdentifierFromURI(d[0])
-                    } else if(itemcontext == "AppRazaoSocial"){
+                    } else if (itemcontext == "AppRazaoSocial") {
                         resourceAppHigienizada = "http://www.sefaz.ma.gov.br/resource/AppRazaoSocial/Empresa/" + getIdentifierFromURI(d[0])
                     } else {
                         resourceAppHigienizada = "http://www.sefaz.ma.gov.br/resource/AppEndereco/Estabelecimento/" + getIdentifierFromURI(d[0])
@@ -57,7 +62,7 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
                     itemsOfContext += `<a role="button" title="Contexto Visão Higienizada" href="/browser?uri=${resourceAppHigienizada}" class="btn list-group-item list-group-item-action"><i>Visão <i> <b>Higienizada</b></a>`
                 } else {
                     temLinkComOutrasFontes = true
-                    itemsOfContext += `<a role="button" title="Contexto ${titleOfContext} ${itemcontext}" href="/browser?uri=${d[0]}" class="btn list-group-item list-group-item-action"><i>Visão da Fonte</i> <b>${itemcontext}</b></a>`
+                    itemsOfContext += `<a role="button" title="Contexto ${titleOfContext} ${itemcontext}" href="/browser?uri=${d[0]}" class="btn list-group-item list-group-item-action"><i>Visão Exportada</i> <b>${itemcontext}</b></a>`
                 }
             });
         }
@@ -67,11 +72,10 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
     }
 
     /**Só exibir se tiver links same-as com outra(s) fonte(s). */
-    console.log(`tem links same-as???`, temLinkComOutrasFontes, context, exibeContextoQuandoVisãoHigienizada(context))
     // if(temLinkComOutrasFontes && !exibeContextoQuandoVisãoHigienizada(context) && expand_sameas == "True"){
-    if(temLinkComOutrasFontes && expand_sameas == "True"){
+    if (temLinkComOutrasFontes && expand_sameas == "True") {
         $("#btn_visao_unificada").hide()
-    }else{
+    } else {
         $("#btn_visao_unificada").show()
     }
     itemsOfContext += `</div>`
@@ -178,12 +182,16 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
                         row += '<li><a href="' + encodeURI(d[0]) + '" target="_blank"><img src="' + d[0] + '" alt="' + d[0] + '" title="' + d[0] + '" class="thumbnail"/></a></li>';
                     }
                     else {//Properties is another objectProperty
-                        /** aqui cortar quando for uma Sociedade e Visão Higienizada  */
-                        if (context == "AppSociedade" && property == "http://www.sefaz.ma.gov.br/ontology/tem_sociedade") {
+                        /** Cortar quando for uma Sociedade e Visão Higienizada  */
+                        if ((context == "AppSociedade" || context == "AppRazaoSocial") && property == "http://www.sefaz.ma.gov.br/ontology/status_sociedade") {
                             let _uri_tem_sociedade = d[0].split(" - ")[0]
-                            let _status_sociedade = d[0].split(" - ")[1]
+                            // let _status_sociedade = d[0].split(" - ")[1]
+                            console.log(d[0].split(" - "))
+                            let _uri_segunda_fonte = d[0].split(" - ")[2]
                             row += '<li><a id="link_' + idx_prop + '_' + count_value + '" href="/browser?uri=' + encodeURI(_uri_tem_sociedade) + "&expand_sameas=" + expand_sameas + '">' + _uri_tem_sociedade;
-                            row += `<span class="context">${_status_sociedade}</span>`;
+                            row += '<a id="link_seg_fonte' + idx_prop + '_' + count_value + '" href="/browser?uri=' + encodeURI(_uri_segunda_fonte) + "&expand_sameas=" + expand_sameas + '">' + _uri_segunda_fonte;
+                            // row += `<span>${_status_sociedade}</span>`;
+                            
                         } else {
                             row += '<li><a id="link_' + idx_prop + '_' + count_value + '" href="/browser?uri=' + encodeURI(d[0]) + "&expand_sameas=" + expand_sameas + '">' + d[0];
                         }
@@ -191,7 +199,6 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
 
                         /**ADICIONA BOTÃO PARA APLICAÇÃO DE RECOMENDAÇÃO DE ENDEREÇO */
                         const objectPropertyContext = getContextFromURI(d[0])
-                        console.log(`<>`, property)
                         // if (((property == "http://www.sefaz.ma.gov.br/ontology/tem_endereco" || property == "http://www.sefaz.ma.gov.br/ontology/tem_endereco_recomendado") && objectPropertyContext == "Cadastro_SEFAZ-MA" && exibeContextoQuandoVisãoHigienizada(context))) {
                         if ((property == "http://www.sefaz.ma.gov.br/ontology/tem_endereco_recomendado" && exibeContextoQuandoVisãoHigienizada(context))) {
                             row += `</a><a class="btn btn-sm" href="http://10.33.96.18:5000/recomendacao/0?cnpj=${cpf_cnpj}" target="_blank" style="margin-left: 8px";>Abrir Aplicação</button></li>`
@@ -203,7 +210,7 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
                             else { /**ABRIR A APLICAÇÃO DE RECOMENDAÇÃO PARA PESSOA FÍSICA */
                                 row += `</a><a class="btn btn-sm" href="http://10.33.96.18:5001/recomendacao/PF/0?cnpj=${cpf_cnpj}" target="_blank" style="margin-left: 8px";>Abrir Aplicação</button></li>`
                             }
-                        } 
+                        }
                         else {
                             row += `</a></li>`;
                         }
@@ -240,7 +247,7 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
 
 
                     /**O d[2][0] contém o objeto da tripla (?s owl:sameAs ?o)*/
-                    if (d[2][0] && (exibeContextoQuandoVisãoHigienizada(context) || expand_sameas=="True")) { 
+                    if (d[2][0] && (exibeContextoQuandoVisãoHigienizada(context) || expand_sameas == "True")) {
                         /**ADICIONA O CONTEXTO ÀS PROPRIEDADES DE DADOS (expand_sameas==True) */
                         if (d[2][0].includes('http')) {
                             datatypePropertyContext = getContextFromURI(d[2][0])
@@ -265,11 +272,10 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
                         }
                     }
                     /**ADICIONA BOTÃO PARA ABRIR A APLICAÇÃO DE RAZÃO SOCIAL */
-                    console.log(`<contexto>`, context)
                     if (property == "http://www.sefaz.ma.gov.br/ontology/razao_social_recomendada" && exibeContextoQuandoVisãoHigienizada(context)) {
                         console.log(`<datatypePropertyContext> `, datatypePropertyContext)
                         if (datatypePropertyContext == 'AppRazaoSocial') {
-                            console.log(`eh pj?? `, eh_pessoa_juridica)
+                            // console.log(`eh pj?? `, eh_pessoa_juridica)
                             if (eh_pessoa_juridica) {
                                 row += `<a class="btn btn-sm" href="http://10.33.96.18:5003/razao_social_pj/SIM_RAZAO_SOCIAL_CADSEFAZ/0?search=${cpf_cnpj}" target="_blank" style="margin-left: 8px";>Abrir Aplicação</button></a>`
                             }
@@ -283,14 +289,41 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
                     row += `</p></li>`
                 }
                 const current_idx = idx_prop + '_' + count_value;
-                if (USE_LABELS && d[0].includes('http') && (exibeContextoQuandoVisãoHigienizada(context) || expand_sameas == "True")|| property == "http://www.w3.org/2002/07/owl#sameAs") {
-                    label_object = d3.json("/get_label?uri=" + encodeURI(d[0])).then(function (l_obj) {
-                        if (l_obj['label'].trim().length > 0)
-                            $('#link_' + current_idx).text(l_obj['label']);
-                        /**ADICIONA O CONTEXTO ÀS PROPRIEDADES DE OBJETO */
-                        const objectPropertyContext = getContextFromURI(d[0])
-                        $('#link_' + current_idx).append(`<span class="context">${objectPropertyContext}</span>`);
-                    });
+                if (USE_LABELS && d[0].includes('http') && (exibeContextoQuandoVisãoHigienizada(context) || expand_sameas == "True") || property == "http://www.w3.org/2002/07/owl#sameAs") {
+                    if ((context == "AppSociedade" || context == "AppRazaoSocial") && property == "http://www.sefaz.ma.gov.br/ontology/status_sociedade") {
+                        let a  = d[0].split(" - ")[0]
+                        let b = d[0].split(" - ")[1]
+                        let c = d[0].split(" - ")[2]
+
+                        label_object = d3.json("/get_label?uri=" + encodeURI(a)).then(function (l_obj) {
+                            if (l_obj['label'].trim().length > 0)
+                                $('#link_' + current_idx).text(l_obj['label']);
+                                $('#link_' + current_idx).append(`<span class="context">${getContextFromURI(a)}</span>`);
+                            /**ADICIONA O STATUS DA SOCIEDADE AO RECURSO HIGIENIZADO */
+                            $('#link_' + current_idx).append(`<span class="${CSS_PARA_STATUS_DA_SOCIEDADE[b]}">${b}</span>`);
+                            
+                        });
+                        d3.json("/get_label?uri=" + encodeURI(c)).then(function (label_segunda_fonte) {
+                            /**ADICIONA SEGUNDA FONTE DO STATUS DA SOCIEDADE AO RECURSO HIGIENIZADO */
+                            if (label_segunda_fonte['label'].trim().length > 0) {
+                                $('#link_seg_fonte' + current_idx).text(label_segunda_fonte['label']);
+                                $('#link_seg_fonte' + current_idx).append(`<span class="context">${getContextFromURI(c)}</span>`);
+                            }
+                            else {
+                                $('#link_seg_fonte' + current_idx).append(' ' + c);
+                            }
+                                
+                        });
+
+                    } else {
+                        label_object = d3.json("/get_label?uri=" + encodeURI(d[0])).then(function (l_obj) {
+                            if (l_obj['label'].trim().length > 0)
+                                $('#link_' + current_idx).text(l_obj['label']);
+                            /**ADICIONA O CONTEXTO ÀS PROPRIEDADES DE OBJETO */
+                            const objectPropertyContext = getContextFromURI(d[0])
+                            $('#link_' + current_idx).append(`<span class="context">${objectPropertyContext}</span>`);
+                        });
+                    }
                 }
 
                 if (d[1].length > 0) {//Property has metadata (lirb:N_ary_Relation_Class)

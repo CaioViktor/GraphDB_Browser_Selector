@@ -372,6 +372,22 @@ td, th{
 	background: #dfdfdf;
 	margin-left: 8px;
 }
+.status-sociedade-nao-divergente{
+	color: #fefefe;
+	background: #027a42;
+	border-radius: 8px;
+	padding: 0px 4px;
+	margin-left: 8px;
+	margin-right: 8px;
+}
+.status-sociedade-divergente{
+	color: #fefefe;
+	background: #EC5353;
+	border-radius: 8px;
+	padding: 0px 4px;
+	margin-left: 8px;
+	margin-right: 8px;
+}
 
 .emphasi-context{
 	margin-left: 6px;
