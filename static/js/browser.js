@@ -183,14 +183,14 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
                     }
                     else {//Properties is another objectProperty
                         /** Cortar quando for uma Sociedade e Visão Higienizada  */
-                        if ((context == "AppSociedade" || context == "AppRazaoSocial") && property == "http://www.sefaz.ma.gov.br/ontology/status_sociedade") {
+                        if ((context == "AppSociedade" || context == "AppRazaoSocial") && property == "http://www.sefaz.ma.gov.br/ontology/tem_sociedade") {
                             let _uri_tem_sociedade = d[0].split(" - ")[0]
-                            // let _status_sociedade = d[0].split(" - ")[1]
                             console.log(d[0].split(" - "))
                             let _uri_segunda_fonte = d[0].split(" - ")[2]
                             row += '<li><a id="link_' + idx_prop + '_' + count_value + '" href="/browser?uri=' + encodeURI(_uri_tem_sociedade) + "&expand_sameas=" + expand_sameas + '">' + _uri_tem_sociedade;
-                            row += '<a id="link_seg_fonte' + idx_prop + '_' + count_value + '" href="/browser?uri=' + encodeURI(_uri_segunda_fonte) + "&expand_sameas=" + expand_sameas + '">' + _uri_segunda_fonte;
-                            // row += `<span>${_status_sociedade}</span>`;
+                            if(_uri_segunda_fonte){
+                                row += '<a id="link_seg_fonte' + idx_prop + '_' + count_value + '" href="/browser?uri=' + encodeURI(_uri_segunda_fonte) + "&expand_sameas=" + expand_sameas + '">' + _uri_segunda_fonte;
+                            }
                             
                         } else {
                             row += '<li><a id="link_' + idx_prop + '_' + count_value + '" href="/browser?uri=' + encodeURI(d[0]) + "&expand_sameas=" + expand_sameas + '">' + d[0];
@@ -234,7 +234,6 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
                             let year = d[0].slice(0, 4)
                             let month = d[0].slice(4, 6)
                             let day = d[0].slice(6, 8)
-                            // console.log(year, month, day)
                             date_pt_br = new Date(Date.UTC(year, month - 1, day, 3, 0, 0)).toLocaleDateString('pt-BR')
                         }
                         row += '<li><p id="link_' + idx_prop + '_' + count_value + '">' + date_pt_br;
@@ -290,7 +289,7 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
                 }
                 const current_idx = idx_prop + '_' + count_value;
                 if (USE_LABELS && d[0].includes('http') && (exibeContextoQuandoVisãoHigienizada(context) || expand_sameas == "True") || property == "http://www.w3.org/2002/07/owl#sameAs") {
-                    if ((context == "AppSociedade" || context == "AppRazaoSocial") && property == "http://www.sefaz.ma.gov.br/ontology/status_sociedade") {
+                    if ((context == "AppSociedade" || context == "AppRazaoSocial") && property == "http://www.sefaz.ma.gov.br/ontology/tem_sociedade") {
                         let a  = d[0].split(" - ")[0]
                         let b = d[0].split(" - ")[1]
                         let c = d[0].split(" - ")[2]
