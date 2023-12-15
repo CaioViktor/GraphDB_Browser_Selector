@@ -173,7 +173,7 @@ def list_resources(page,methods=['GET']):
             prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
             select ?resource ?label where {{ 
                 ?resource a <{classRDF}>.
-                {label_query}
+                OPTIONAL {label_query}
                 BIND(COALESCE(?l,?resource) AS ?label)
                 {filterSearch}
                 FILTER(!CONTAINS(STR(?resource),"http://www.sefaz.ma.gov.br/resource/AppEndereco/"))
@@ -189,7 +189,7 @@ def list_resources(page,methods=['GET']):
             prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
             select ?resource ?label where {{ 
                 ?resource ?p _:x2.
-                {label_query}
+                OPTIONAL {label_query}
                 BIND(COALESCE(?l,?resource) AS ?label)
                 {filterSearch}
                 FILTER(!CONTAINS(STR(?resource),"www.sefaz.ma.gov.br/resource/AppEndereco/"))
