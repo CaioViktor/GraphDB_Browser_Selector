@@ -163,7 +163,7 @@ def list_resources(page,methods=['GET']):
     if USE_LABELS:
         label_query = """{
                     ?resource rdfs:label ?l.
-                }"""
+            } """
     filterSearch = ""
     if search != None and search != '':
         filterSearch = f"""FILTER(REGEX(STR(?resource),"{search}","i") || REGEX(STR(?label),"{search}","i"))"""
@@ -176,9 +176,9 @@ def list_resources(page,methods=['GET']):
                 OPTIONAL {label_query}
                 BIND(COALESCE(?l,?resource) AS ?label)
                 {filterSearch}
-                FILTER(!CONTAINS(STR(?resource),"http://www.sefaz.ma.gov.br/resource/AppEndereco/"))
-                FILTER(!CONTAINS(STR(?resource),"http://www.sefaz.ma.gov.br/resource/AppRazaoSocial/"))
-                FILTER(!CONTAINS(STR(?resource),"http://www.sefaz.ma.gov.br/resource/AppNomeFantasia/"))
+                #FILTER(!CONTAINS(STR(?resource),"http://www.sefaz.ma.gov.br/resource/AppEndereco/"))
+                #FILTER(!CONTAINS(STR(?resource),"http://www.sefaz.ma.gov.br/resource/AppRazaoSocial/"))
+                #FILTER(!CONTAINS(STR(?resource),"http://www.sefaz.ma.gov.br/resource/AppNomeFantasia/"))
             }}
             LIMIT 100
             OFFSET {offset}
@@ -192,9 +192,9 @@ def list_resources(page,methods=['GET']):
                 OPTIONAL {label_query}
                 BIND(COALESCE(?l,?resource) AS ?label)
                 {filterSearch}
-                FILTER(!CONTAINS(STR(?resource),"www.sefaz.ma.gov.br/resource/AppEndereco/"))
-                FILTER(!CONTAINS(STR(?resource),"http://www.sefaz.ma.gov.br/resource/AppRazaoSocial/"))
-                FILTER(!CONTAINS(STR(?resource),"http://www.sefaz.ma.gov.br/resource/AppNomeFantasia/"))
+                #FILTER(!CONTAINS(STR(?resource),"www.sefaz.ma.gov.br/resource/AppEndereco/"))
+                #FILTER(!CONTAINS(STR(?resource),"http://www.sefaz.ma.gov.br/resource/AppRazaoSocial/"))
+                #FILTER(!CONTAINS(STR(?resource),"http://www.sefaz.ma.gov.br/resource/AppNomeFantasia/"))
             }}
             LIMIT 100
             OFFSET {offset}
@@ -257,7 +257,7 @@ def browser(methods=['GET']):
 @app.route("/get_properties")
 def get_properties(methods=['GET']):
     uri = request.args.get('uri',default="")
-    print('<>')
+    print('::_____________::\n')
     print('<uri>',uri)
 
     expand_sameas = request.args.get('expand_sameas',default="False")
@@ -290,6 +290,7 @@ def get_properties(methods=['GET']):
             }}
             """
     if EXPAND_SAMEAS:
+        print('\n\n\nvisão unificada\n\n\n')
         select = f"select ?same ?p ?o where {{"
         if MAIN_DATA_SOURCE in uri:
             selection_triple = f"""
@@ -374,7 +375,7 @@ def get_properties(methods=['GET']):
             else:
                 properties_o[result['p']['value']].append([result['o']['value'], [], [result['same']['value'],[]]])
         else:
-            print(result['o'], end='\n\n')
+            print('se entrou aqui quano visão unificada disable, ok', result['o'], end='\n\n')
             if 'datatype' in result['o']:
                 properties_o[result['p']['value']].append([result['o']['value'], [], [result['same']['value']], result['o']['datatype']])
             else:
@@ -488,7 +489,7 @@ def getLabel(methods=['GET']):
             PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
             select ?s (MAX(?label) as ?label) where {{ 
                 BIND(<{uri}> as ?s)
-                ?s rdfs:label ?l.
+                OPTIONAL {{ ?s rdfs:label ?l. }}
             
                 BIND(COALESCE(?l,?s) AS ?label)
             }} GROUP BY ?s

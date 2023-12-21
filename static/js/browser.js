@@ -114,6 +114,14 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
         row += '</div>';
         $('#highlight_properties').append(row);
         countLabels += 1
+    }else{
+        $(".header-table>b").text(`${getIdentifierFromURI(uri)}`);
+        $(".header-table>em").text(`contexto: ${APPS_DE_HIGIENIZACAO.includes(context) ? "Visão Higienizada" : context}`);
+        $("#nav-label").append(`não tem label`);
+        let row = '<div id="label" class="row"><i class="fa-solid fa-tag" title="Nomes"></i>';
+            row += '<p title="Label"><b>' + getIdentifierFromURI(uri) + '</b></p>';
+        row += '</div>';
+        $('#highlight_properties').append(row);
     }
 
     if (expand_sameas == "True") {
@@ -134,7 +142,7 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
     let auxLabelOfClasses = []
     if ('http://www.w3.org/1999/02/22-rdf-syntax-ns#type' in properties) {//Types
         let row = '<div id="type">';
-        row += '<b title="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">Types</b>';
+        row += '<b title="http://www.w3.org/1999/02/22-rdf-syntax-ns#type">Tipos</b>';
         row += '<div id="types" class="row">'
         dataR['properties']['http://www.w3.org/1999/02/22-rdf-syntax-ns#type'].forEach(function (d) {
 
@@ -160,8 +168,9 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
     for (property in dataR['properties']) {//Others properties
         if (!(propriedadesDestaque.includes(property))) {
             let row = '<div id="' + property + '">';
-            if (property in properties_list)//Property has label
+            if (property in properties_list) {//Property has label
                 row += '<b title="' + property + '">' + properties_list[property] + ' (' + dataR['properties'][property].length + ') <i class="fa-solid fa-arrow-right"></i></b>';
+            }
             else {//Property don't have label
                 let label = property.split("/");
                 label = label[label.length - 1];
@@ -177,7 +186,7 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
                     row += "<details><summary>More (" + (dataR['properties'][property].length - count_value) + ")</summary>";
 
 
-                if (d[0].includes('http')) { //Properties is an objectProperty
+                if (d[0].includes('http://')) { //Properties is an objectProperty
                     if (['.png', '.jpeg', '.jpg', '.gif', '.svg', '.ico', '.apng', '.bmp'].some(typ => d[0].includes(typ))) {//Property is a image link
                         row += '<li><a href="' + encodeURI(d[0]) + '" target="_blank"><img src="' + d[0] + '" alt="' + d[0] + '" title="' + d[0] + '" class="thumbnail"/></a></li>';
                     }
@@ -226,7 +235,7 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
                     }
                 }
                 else {//Properties is a datatypeProperty
-                    if (d[3] && d[3].includes('date') || property.includes('data')) { /** Para exibir as data no padrão brasileiro */
+                    if ((d[3] && d[3].includes('date')) || property.includes('/data')) { /** Para exibir as data no padrão brasileiro */
                         let date_pt_br = ""
                         if (d[0].includes("-")) { /**O formato na fonte Cadastro vem YYYY-MM-DD HH:mm:ss */
                             date_pt_br = new Date(d[0]).toLocaleDateString('pt-BR')
