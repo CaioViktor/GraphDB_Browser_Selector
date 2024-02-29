@@ -6,12 +6,24 @@ import json
 import urllib.parse
 from config import *
 
-
-
+# sparql_ontology = SPARQLWrapper(ENDPOINT_ONTOLOGY)
+# sparql_resources = SPARQLWrapper(ENDPOINT_RESOURCES)
+# sparql_history = SPARQLWrapper(ENDPOINT_HISTORY)
 
 sparql_ontology = SPARQLWrapper(ENDPOINT_ONTOLOGY)
+if USE_CREDENTIAL:
+    sparql_ontology.setHTTPAuth('BASIC')
+    sparql_ontology.setCredentials(USER, PASSWORD)
+
 sparql_resources = SPARQLWrapper(ENDPOINT_RESOURCES)
+if USE_CREDENTIAL:
+    sparql_resources.setHTTPAuth('BASIC')
+    sparql_resources.setCredentials(USER, PASSWORD)
+
 sparql_history = SPARQLWrapper(ENDPOINT_HISTORY)
+if USE_CREDENTIAL:
+    sparql_history.setHTTPAuth('BASIC')
+    sparql_history.setCredentials(USER, PASSWORD)
 
 
 list_highlights_classes = []

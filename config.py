@@ -4,6 +4,11 @@
 #
 #
 
+#Crendentials 
+USE_CREDENTIAL = True #Default= False. If True, set USER and PASSWORD
+USER = "admin" #Default GraphDB value = "admin"
+PASSWORD = "root" #Default GraphDB value = "root"
+
 #Default configuration
 #
 # ENDPOINT_ONTOLOGY = "http://localhost:7200/repositories/YOUR"#Endpoint for ontology
@@ -28,23 +33,24 @@
 
 
 # SEFAZ-MA CONTEXTO
-# ENDPOINT_ONTOLOGY = "http://localhost:7200/repositories/ONTOLOGIA_DOMINIO"
-# ENDPOINT_RESOURCES = "http://localhost:7200/repositories/GRAFO_PRODUCAO_MATERIALIZADO"
-# ENDPOINT_HISTORY = "http://localhost:7200/repositories/GRAFO_PRODUCAO_MATERIALIZADO"
-# GRAPHDB_BROWSER = "http://localhost:7200/graphs-visualizations"
-# HIGHLIGHT_CLASSES = ['http://xmlns.com/foaf/0.1/Organization','http://www.sefaz.ma.gov.br/ontology/Estabelecimento', 'http://xmlns.com/foaf/0.1/Person', 'http://www.sefaz.ma.gov.br/ontology/Sociedade'] #A list with URIs of highlighted classes
-# MAIN_DATA_SOURCE = "Cadastro_SEFAZ-MA"
-# GRAPHDB_BROWSER_CONFIG = "&config=63b76b9865064cd8a9775e1e2f46ff4d"
-# USE_N_ARY_RELATIONS = False
-# USE_LABELS = True #Set True to get labels for resources. When querying virtual repositories maybe be better set to False
-
-# SEMANTIC-FORTALEZA
-ENDPOINT_ONTOLOGY = "http://localhost:7200/repositories/ONTOLOGIA_DOMINIO_BIGSEMFORTALEZA"
-ENDPOINT_RESOURCES = "http://localhost:7200/repositories/GRAFO_PRODUCAO_BIGSEMFORTALEZA"
+ENDPOINT_ONTOLOGY = "http://localhost:7200/repositories/ONTOLOGIA_DOMINIO"
+ENDPOINT_RESOURCES = "http://localhost:7200/repositories/GRAFO_PRODUCAO_MATERIALIZADO"
+ENDPOINT_HISTORY = "http://localhost:7200/repositories/GRAFO_PRODUCAO_MATERIALIZADO"
 GRAPHDB_BROWSER = "http://localhost:7200/graphs-visualizations"
+# HIGHLIGHT_CLASSES = ['http://xmlns.com/foaf/0.1/Organization','http://www.sefaz.ma.gov.br/ontology/Estabelecimento_RFB', 'http://xmlns.com/foaf/0.1/Person', 'http://www.sefaz.ma.gov.br/ontology/Sociedade'] #A list with URIs of highlighted classes
+HIGHLIGHT_CLASSES = ['http://xmlns.com/foaf/0.1/Organization','http://www.sefaz.ma.gov.br/ontology/Empresa_Cadastro','http://www.sefaz.ma.gov.br/ontology/Empresa_RFB', 'http://www.sefaz.ma.gov.br/ontology/Estabelecimento_Cadastro', 'http://www.sefaz.ma.gov.br/ontology/Estabelecimento_RFB'] #A list with URIs of highlighted classes
+MAIN_DATA_SOURCE = "Cadastro_SEFAZ-MA"
 GRAPHDB_BROWSER_CONFIG = "&config=63b76b9865064cd8a9775e1e2f46ff4d"
-ENDPOINT_HISTORY = "http://localhost:7200/repositories/GRAFO_PRODUCAO_BIGSEMFORTALEZA"
 USE_N_ARY_RELATIONS = False
 USE_LABELS = True #Set True to get labels for resources. When querying virtual repositories maybe be better set to False
-HIGHLIGHT_CLASSES = ['http://xmlns.com/foaf/0.1/Organization','http://www.sefaz.ma.gov.br/ontology/Estabelecimento', 'http://xmlns.com/foaf/0.1/Person', 'http://www.sefaz.ma.gov.br/ontology/Sociedade'] #A list with URIs of highlighted classes
-MAIN_DATA_SOURCE = "criancasMatriculadas"
+LANGUAGE_PREFERED = "en"
+# SEMANTIC-FORTALEZA
+# ENDPOINT_ONTOLOGY = "http://localhost:7200/repositories/ONTOLOGIA_DOMINIO_BIGSEMFORTALEZA"
+# ENDPOINT_RESOURCES = "http://localhost:7200/repositories/GRAFO_PRODUCAO_BIGSEMFORTALEZA"
+# GRAPHDB_BROWSER = "http://localhost:7200/graphs-visualizations"
+# GRAPHDB_BROWSER_CONFIG = "&config=63b76b9865064cd8a9775e1e2f46ff4d"
+# ENDPOINT_HISTORY = "http://localhost:7200/repositories/GRAFO_PRODUCAO_BIGSEMFORTALEZA"
+# USE_N_ARY_RELATIONS = False
+# USE_LABELS = True #Set True to get labels for resources. When querying virtual repositories maybe be better set to False
+# HIGHLIGHT_CLASSES = ['http://xmlns.com/foaf/0.1/Person', 'http://www.bigdatafortaleza.com/dominio/Crianca_de_0_a_3_anos'] #A list with URIs of highlighted classes
+# MAIN_DATA_SOURCE = "criancasMatriculadas"

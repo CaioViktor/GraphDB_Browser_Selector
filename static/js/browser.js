@@ -49,6 +49,7 @@ const data = d3.json("/get_properties?uri=" + encodeURI(uri) + "&expand_sameas="
     let temLinkComOutrasFontes = false
     for (property in dataR['properties']) {//Looping for all properties
         if (property == 'http://www.w3.org/2002/07/owl#sameAs') {//Resource has sameAs link
+            console.log(`TESTE DE SAMEAS.................`)
             dataR['properties'][property].forEach(function (d) {
                 itemcontext = getContextFromURI(d[0])
                 if (APPS_DE_HIGIENIZACAO.includes(itemcontext)) {
